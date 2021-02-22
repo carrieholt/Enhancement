@@ -1,0 +1,22 @@
+*.user
+*.aux
+*.bbl
+*.blg
+*~*
+*.dvi
+*.log
+*.lot
+*.pdf
+*.png
+*.ps
+*.toc
+# *.txt
+*.out
+*.snm
+*.nav
+*.synctex.gz*
+knitr-cache
+.RData
+.RHistory
+myNotes.*
+.Rproj.user
