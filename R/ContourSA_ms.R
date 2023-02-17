@@ -4,8 +4,14 @@
 # Used by ContourSA_ms_plots.r
 
 #First run.lever.model over all combinations, and output 4 lists (of lists)
+
+
+# Need to install older versin of akima for contour plots
+# detach("package:akima", unload=TRUE)
+# install.packages("C:/Users/HoltC/AppData/Local/Programs/R/R-4.2.1/library/akima_0.6-2.tar.gz", repos = NULL, type="source")
 library(akima)
 library(RColorBrewer)
+
 mar.surv.const<-TRUE#Is the marine suvival assumed to be 0.02 when estimating Seq, or derived from inputed marine survival?
 c=400000; percent.hatch=0; HR=0.4; h=sqrt(0.25); w=sqrt(100);RS=0.8#pdf.label="Contourplots20Feb2017.pdf"; 
 

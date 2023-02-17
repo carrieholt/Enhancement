@@ -1,8 +1,8 @@
 #RunLeverSA
 #Date last revised 6 Jan 2017
 
-source("FuncDefs.r")
-source("run.lever.model.r")
+source(here::here("R", "FuncDefs.r"))
+source(here::here("R", "run.lever.model.r"))
 
 Data_DF <- data.frame(Per.mark=numeric(96), Hatchery.size=numeric(96), Sel=numeric(96), c=numeric(96), mar.surv=numeric(96), RS=numeric(96), mar.surv.hatch=numeric(96), HR=numeric(96), h=numeric(06), w=numeric(96), PNI=numeric(96),pHOS=numeric(96), pNOB=numeric(96), Rec=numeric(96), RperS=numeric(96), HP=numeric(96), C=numeric(96) )
 Data_DF$Per.mark <- rep(rep(c(0.1,0.5), 4),12)

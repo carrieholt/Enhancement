@@ -2,7 +2,7 @@
 #Date last revised 5 Apr 2017
 
 
-Run.contours<-function(c, percent.hatch, HR, h, w, RS, pdf.label){  
+Run.contours<-function(c, percent.hatch, HR, h, w, RS, pdf.label, scenario=NA, title=NA, dir=NA){  
 
 PNImh<-matrix(NA,100,100); pHOSmh<-matrix(NA,100,100); pNOBmh<-matrix(NA,100,100);  RperSmh<-matrix(NA,100,100); Ret.natmh<-matrix(NA,100,100); Ret.hatmh<-matrix(NA,100,100); Catchmh<-matrix(NA,100,100); fitmh<-matrix(NA,100,100); BSmarkmh<-matrix(NA,100,100);
 PNIsh<-matrix(NA,100,100); pHOSsh<-matrix(NA,100,100); pNOBsh<-matrix(NA,100,100);  RperSsh<-matrix(NA,100,100); Ret.natsh<-matrix(NA,100,100); Ret.hatsh<-matrix(NA,100,100); Catchsh<-matrix(NA,100,100); fitsh<-matrix(NA,100,100); BSmarksh<-matrix(NA,100,100);
@@ -190,14 +190,37 @@ mtext(side=1, text="Proportion of marked fish\nselectively removed", line=2.8, c
 mtext(side=2, text="Hatchery size\n", line=1.1, cex=0.8)
 mtext(side=3, text="(50% marking)", line=0.1, cex=0.6, at=1, adj=1)
 mtext(side=3, text="(b)", line=0.1, cex=0.8, at=0, adj=0)
-if(output.label=="pHOSeff") mtext(side=3, text=expression(paste("pHOSeff: Low ", gamma)), line=2, outer=F, cex=1.5, at=-0.2)#(output.label=="pHOSeff") #text=expression('pHOS'[eff])
-if(output.label=="PNI") mtext(side=3, text=expression(paste("PNI: Low ", gamma)), line=2, outer=F, cex=1.5, at=-0.2)
-if(output.label=="pNOB") mtext(side=3, text=expression(paste("pNOB: Low ", gamma)), line=2, outer=F, cex=1.5, at=-0.2)
-#if(output.label=="Recruits from river spawners (HOS+NOS)") mtext(side=3, text=paste(output.label,"\nLow cf", sep=""), line=1.5, outer=F, cex=1.5, at=-0.2)
-if(output.label=="Recruits from river spawners (HOS+NOS)") mtext(side=3, text=expression(paste("Recruits from river spawners (HOS+NOS):Low ", gamma)), line=1.5, outer=F, cex=1.5, at=-0.2)
-if(output.label=="Recruits from hatchery production") mtext(side=3, text=expression(paste("Recruits from hatchery production:Low ", gamma)), line=1.5, outer=F, cex=1.5, at=-0.2)
+# if(output.label=="pHOSeff") mtext(side=3, text=expression(paste("pHOSeff: Low ", gamma)), line=2, outer=F, cex=1.5, at=-0.2)#(output.label=="pHOSeff") #text=expression('pHOS'[eff])
+# if(output.label=="PNI") mtext(side=3, text=expression(paste("PNI: Low ", gamma)), line=2, outer=F, cex=1.5, at=-0.2)
+# if(output.label=="pNOB") mtext(side=3, text=expression(paste("pNOB: Low ", gamma)), line=2, outer=F, cex=1.5, at=-0.2)
+# if(output.label=="Recruits from river spawners (HOS+NOS)") mtext(side=3, text=expression(paste("Recruits from river spawners (HOS+NOS):Low ", gamma)), line=1.5, outer=F, cex=1.5, at=-0.2)
+# if(output.label=="Recruits from hatchery production") mtext(side=3, text=expression(paste("Recruits from hatchery production:Low ", gamma)), line=1.5, outer=F, cex=1.5, at=-0.2)
+# if(output.label=="Catch") mtext(side=3, text=expression(paste("Catch: Low ", gamma)), line=2, outer=F, cex=1.5, at=-0.2)
+if(scenario=="rs0.2"){
+  if(output.label=="pHOSeff") mtext(side=3, text=expression(paste("pHOSef: LOw", gamma)), line=2, outer=F, cex=1.5, at=-0.2)#(output.label=="pHOSeff") #text=expression('pHOS'[eff])
+  if(output.label=="PNI") mtext(side=3, text=expression(paste("PNI", title)), line=2, outer=F, cex=1.5, at=-0.2)
+  if(output.label=="pNOB") mtext(side=3, text=expression(paste("pNOB", title)), line=2, outer=F, cex=1.5, at=-0.2)
+  if(output.label=="Recruits from river spawners (HOS+NOS)") mtext(side=3, text=expression(paste("Recruits from river spawners (HOS+NOS)", title)), line=1.5, outer=F, cex=1.5, at=-0.2)
+  if(output.label=="Recruits from hatchery production") mtext(side=3, text=expression(paste("Recruits from hatchery production", title)), line=1.5, outer=F, cex=1.5, at=-0.2)
+  if(output.label=="Catch") mtext(side=3, text=expression(paste("Catch", title)), line=2, outer=F, cex=1.5, at=-0.2)
+  
+}
+if(scenario!="rs0.2"){
+  if(output.label=="pHOSeff") mtext(side=3, text=paste("pHOSeff", title, sep=""), line=1.5, outer=F, cex=1.3, at=-0.2)#(output.label=="pHOSeff") #text=expression('pHOS'[eff])
+  if(output.label=="PNI") mtext(side=3, text=paste("PNI", title, sep=""), line=1.5, outer=F, cex=1.3, at=-0.2)
+  if(output.label=="pNOB") mtext(side=3, text=paste("pNOB", title, sep=""), line=1.5, outer=F, cex=1.3, at=-0.2)
+  if(output.label=="Recruits from river spawners (HOS+NOS)") mtext(side=3, text=paste("Recruits from river spawners (HOS+NOS)", title, sep=""), line=1.5, outer=F, cex=1.3, at=-0.2)
+  if(output.label=="Recruits from hatchery production") mtext(side=3, text=paste("Recruits from hatchery production", title, sep=""), line=1.5, outer=F, cex=1.3, at=-0.2)
+  if(output.label=="Catch") mtext(side=3, text=paste("Catch", title, sep=""), line=1.5, outer=F, cex=1.3, at=-0.2)
+  
+}
+# if(output.label=="pHOSeff") mtext(side=3, text=expression(paste("pHOSeff\nWeak selection")), line=2, outer=F, cex=1.5, at=-0.2)#(output.label=="pHOSeff") #text=expression('pHOS'[eff])
+# if(output.label=="PNI") mtext(side=3, text=expression(paste("PNI\nWeak selection")), line=2, outer=F, cex=1.5, at=-0.2)
+# if(output.label=="pNOB") mtext(side=3, text=expression(paste("pNOB\nWeak selection")), line=2, outer=F, cex=1.5, at=-0.2)
+# if(output.label=="Recruits from river spawners (HOS+NOS)") mtext(side=3, text=expression(paste("Recruits from river spawners (HOS+NOS)\nWeak selection")), line=1.5, outer=F, cex=1.5, at=-0.2)
+# if(output.label=="Recruits from hatchery production") mtext(side=3, text=expression(paste("Recruits from hatchery production\nWeak selection")), line=1.5, outer=F, cex=1.5, at=-0.2)
+# if(output.label=="Catch") mtext(side=3, text=expression(paste("Catch\nWeak selection")), line=2, outer=F, cex=1.5, at=-0.2)
 #if(output.label=="Catch") mtext(side=3, text=paste(output.label, ": Low cf", sep=""), line=2, outer=F, cex=1.5, at=-0.2)
-if(output.label=="Catch") mtext(side=3, text=expression(paste("Catch: Low ", gamma)), line=2, outer=F, cex=1.5, at=-0.2)
 
 # Variables (management levers) to assess: %Marking vs selectivity
 # Put data in vector form
@@ -305,7 +328,8 @@ if(output.label=="pNOB"){if(pNOBsh100[1,100]==1){text(x=0.1, y=0.48, labels=c("1
 #png("PNIbasecase6April2017.png", width=6, height=6, units="in", res=1000)
 #png("PNIhigheritability6April2017.png", width=6, height=6, units="in", res=1000)
 #png("PNIweakselection6April2017.png", width=6, height=6, units="in", res=1000)
-png("PNIrs0.228Nov2017.png", width=6, height=6, units="in", res=1000)
+# png("PNIrs0.228Nov2017.png", width=6, height=6, units="in", res=1000)
+png(paste(dir, "PNI", scenario, ".png", sep=""), width=6, height=6, units="in", res=1000)
 outputmh<-PNImh; outputsh<-PNIsh; outputms<-PNIms; outputsh100<-PNIsh100; outputNAsh100<-BSmarksh100; output.label<-"PNI"  #PNI, pHOS, pNOB, RperS, Ret.nat
 Do.contours()
 dev.off()
@@ -313,7 +337,8 @@ dev.off()
 #png("pHOSbasecase6April2017.png", width=6, height=6, units="in", res=1000)
 #png("pHOShigheritability6April2017.png", width=6, height=6, units="in", res=1000)
 #png("pHOSweakselection6April2017.png", width=6, height=6, units="in", res=1000)
-png("pHOSrs0.228Nov2017.png", width=6, height=6, units="in", res=1000)
+# png("pHOSrs0.228Nov2017.png", width=6, height=6, units="in", res=1000)
+png(paste(dir, "pHOS", scenario, ".png", sep=""), width=6, height=6, units="in", res=1000)
 outputmh<-pHOSmh; outputsh<-pHOSsh; outputms<-pHOSms; outputsh100<-pHOSsh100; outputNAsh100<-BSmarksh100; output.label<-"pHOSeff"  #pHOSeff #PNI, pHOS, pNOB, RperS, Ret.nat
 Do.contours()
 dev.off()
@@ -321,7 +346,8 @@ dev.off()
 #png("pNOBbasecase6April2017.png", width=6, height=6, units="in", res=1000)
 #png("pNOBhigheritability6April2017.png", width=6, height=6, units="in", res=1000)
 #png("pNOBweakselection6April2017.png", width=6, height=6, units="in", res=1000)
-png("pNOBrs0.228Nov2017.png", width=6, height=6, units="in", res=1000)
+# png("pNOBrs0.228Nov2017.png", width=6, height=6, units="in", res=1000)
+png(paste(dir, "pNOB", scenario, ".png", paste=""), width=6, height=6, units="in", res=1000)
 outputmh<-pNOBmh; outputsh<-pNOBsh; outputms<-pNOBms; outputsh100<-pNOBsh100; outputNAsh100<-BSmarksh100; output.label<-"pNOB"  #PNI, pHOS, pNOB, RperS, Ret.nat
 Do.contours()
 dev.off()
@@ -329,7 +355,8 @@ dev.off()
 #png("Retnatbasecase6April2017.png", width=6, height=6, units="in", res=1000)
 #png("Retnathigheritability6April2017.png", width=6, height=6, units="in", res=1000)
 #png("Retnatweakselection6April2017.png", width=6, height=6, units="in", res=1000)
-png("Retnatrs0.228Nov2017.png", width=6, height=6, units="in", res=200)
+# png("Retnatrs0.228Nov2017.png", width=6, height=6, units="in", res=200)
+png(paste(dir, "Retnat", scenario, ".png", sep=""), width=6, height=6, units="in", res=200)
 outputmh<-Ret.natmh; outputsh<-Ret.natsh; outputms<-Ret.natms; outputsh100<-Ret.natsh100; outputNAsh100<-BSmarksh100; output.label<-"Recruits from river spawners (HOS+NOS)"  #PNI, pHOS, pNOB, RperS, Ret.nat
 Do.contours()
 dev.off()
@@ -337,7 +364,8 @@ dev.off()
 #png("Rethatbasecase6April2017.png", width=6, height=6, units="in", res=1000)
 #png("Rethathigheritability6April2017.png", width=6, height=6, units="in", res=1000)
 #png("Rethatweakselection6April2017.png", width=6, height=6, units="in", res=1000)
-png("Rethatrs0.228Nov2017.png", width=6, height=6, units="in", res=1000)
+# png("Rethatrs0.228Nov2017.png", width=6, height=6, units="in", res=1000)
+png(paste(dir, "Rethat", scenario, ".png", sep=""), width=6, height=6, units="in", res=1000)
 outputmh<-Ret.hatmh; outputsh<-Ret.hatsh; outputms<-Ret.hatms; outputsh100<-Ret.hatsh100; outputNAsh100<-BSmarksh100; output.label<-"Recruits from hatchery production"  #PNI, pHOS, pNOB, RperS, Ret.nat
 Do.contours()
 dev.off()
@@ -345,7 +373,8 @@ dev.off()
 #png("Catchbasecase6April2017.png", width=6, height=6, units="in", res=1000)
 #png("Catchhigheritability6April2017.png", width=6, height=6, units="in", res=1000)
 #png("Catchweakselection6April2017.png", width=6, height=6, units="in", res=1000)
-png("Catchrs0.228Nov2017.png", width=6, height=6, units="in", res=1000)
+# png("Catchrs0.228Nov2017.png", width=6, height=6, units="in", res=1000)
+png(paste(dir, "Catch", scenario, ".png", sep=""), width=6, height=6, units="in", res=1000)
 outputmh<-Catchmh; outputsh<-Catchsh; outputms<-Catchms; outputsh100<-Catchsh100; outputNAsh100<-BSmarksh100; output.label<-"Catch"  #PNI, pHOS, pNOB, RperS, Ret.nat
 Do.contours()
 dev.off()

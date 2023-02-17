@@ -250,27 +250,32 @@ for (ms.scenario in 1:4){
 #Run Contour Plots
 #pdf("Contour_msSA_6April2017.pdf")
 
-png("PNIms21April2017.png", width=6, height=6, units="in", res=1000)
+# png("PNIms21April2017.png", width=6, height=6, units="in", res=1000)
+png(here::here("Results", "2018", "SensitivityAnalyses" , "PNIms.png"), width=6, height=6, units="in", res=1000)
 par(mfcol=c(3,4), oma=c(2,1,2,0.5))
 plot.3x4(metric="PNI")
 dev.off()
 
-png("pHOSms21April2017.png", width=6, height=6, units="in", res=1000)
+# png("pHOSms21April2017.png", width=6, height=6, units="in", res=1000)
+png(here::here("Results", "2018", "Appendices", "pHOSms.png"), width=6, height=6, units="in", res=1000)
 par(mfcol=c(3,4), oma=c(2,1,2,0.5))
 plot.3x4(metric="pHOSeff")
 dev.off()
 
-png("pNOBms21April2017.png", width=6, height=6, units="in", res=1000)
+# png("pNOBms21April2017.png", width=6, height=6, units="in", res=1000)
+png(here::here("Results", "2018", "Appendices", "pNOBms.png"), width=6, height=6, units="in", res=1000)
 par(mfcol=c(3,4), oma=c(2,1,2,0.5))
 plot.3x4(metric="pNOB")
 dev.off()
 
-png("Retnatms21April2017.png", width=6, height=6, units="in", res=1000)
+# png("Retnatms21April2017.png", width=6, height=6, units="in", res=1000)
+png(here::here("Results", "2018", "Appendices", "Retnatms.png"), width=6, height=6, units="in", res=1000)
 par(mfcol=c(3,4), oma=c(2,1,2,0.5))
 plot.3x4(metric="Ret.nat")
 dev.off()
 
-png("Rethatms21April2017.png", width=6, height=6, units="in", res=1000)
+# png("Rethatms21April2017.png", width=6, height=6, units="in", res=1000)
+png(here::here("Results", "2018", "Appendices", "Rethatms.png"), width=6, height=6, units="in", res=1000)
 par(mfcol=c(3,4), oma=c(2,1,2,0.5))
 plot.3x4(metric="Ret.hat")
 dev.off()

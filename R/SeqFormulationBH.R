@@ -42,6 +42,8 @@ HOS<-NA; NOS<-NA; Ret<-NA; Adults<-NA
 
 #Can add HR here to estimate what is sustainable under a given HR
 Seq<-((c*mar.surv*(1-HR))*((p*mar.surv*(1-HR))-1)/(p*mar.surv*(1-HR)))#*mar.surv
+Seq <- c * (p*mar.surv*(1-HR)-1) / p # same as above, but simpler (Feb 2023)
+
 NOS[1]<-Seq
 HOS[1]<-HOR*(1-per.hatch)
 Ret[1]<-mar.surv*BH(HOS[1], NOS[1], RS, p, c)
