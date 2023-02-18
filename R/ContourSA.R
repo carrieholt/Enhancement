@@ -2,7 +2,7 @@
 #Date last revised 5 Apr 2017
 
 
-Run.contours<-function(c, percent.hatch, HR, h, w, RS, pdf.label, scenario=NA, title=NA, dir=NA){  
+Run.contours<-function(c, percent.hatch, sex.ratio, HR, h, w, RS, scenario=NA, title=NA, dir=NA){  
 
 PNImh<-matrix(NA,100,100); pHOSmh<-matrix(NA,100,100); pNOBmh<-matrix(NA,100,100);  RperSmh<-matrix(NA,100,100); Ret.natmh<-matrix(NA,100,100); Ret.hatmh<-matrix(NA,100,100); Catchmh<-matrix(NA,100,100); fitmh<-matrix(NA,100,100); BSmarkmh<-matrix(NA,100,100);
 PNIsh<-matrix(NA,100,100); pHOSsh<-matrix(NA,100,100); pNOBsh<-matrix(NA,100,100);  RperSsh<-matrix(NA,100,100); Ret.natsh<-matrix(NA,100,100); Ret.hatsh<-matrix(NA,100,100); Catchsh<-matrix(NA,100,100); fitsh<-matrix(NA,100,100); BSmarksh<-matrix(NA,100,100);
@@ -17,7 +17,7 @@ sh100.hatchery.size<-NA; sh100.per.mark<-NA; sh100.BS<-NA
 for(i in 1:100){
   print(i)
   for (j in 1:100){
-  mh<-run.lever.model(per.mark=i*0.01, hatchery.size=j*0.005, sel=0, Theta.hatch=80, c=c, percent.hatch=percent.hatch, HR=HR, h=h, w=w, mar.surv=0.02, RS=RS, mar.surv.hatch=0.0024)
+  mh<-run.lever.model(per.mark=i*0.01, hatchery.size=j*0.005, sel=0, Theta.hatch=80, c=c, percent.hatch=percent.hatch, HR=HR, h=h, w=w, mar.surv=0.02, RS=RS, mar.surv.hatch=0.0024, sex.ratio=sex.ratio)
   mh.sel<-mh$sel
   if (i==1){mh.hatchery.size[j]<-mh$hatchery.size; mh.BS[j]<-mh$BS[100]}
   PNImh[i,j]<-mh$PNI[100]
@@ -30,7 +30,7 @@ for(i in 1:100){
   fitmh[i,j]<-mh$fit.adult[100]
   BSmarkmh[i,j]<-mh$BS.mark
   
-  sh<-run.lever.model(per.mark=0.5, hatchery.size=j*0.005, sel=i*0.01, Theta.hatch=80, c=c, percent.hatch=percent.hatch, HR=HR, h=h, w=w, mar.surv=0.02, RS=RS, mar.surv.hatch=0.0024)
+  sh<-run.lever.model(per.mark=0.5, hatchery.size=j*0.005, sel=i*0.01, Theta.hatch=80, c=c, percent.hatch=percent.hatch, HR=HR, h=h, w=w, mar.surv=0.02, RS=RS, mar.surv.hatch=0.0024, sex.ratio=sex.ratio)
   sh.per.mark<-sh$per.mark
   if (i==1){sh.hatchery.size[j]<-sh$hatchery.size;  sh.BS[j]<-sh$BS[100]}
   PNIsh[i,j]<-sh$PNI[100]
@@ -43,7 +43,7 @@ for(i in 1:100){
   fitsh[i,j]<-sh$fit.adult[100]
   BSmarksh[i,j]<-sh$BS.mark
   
-  ms<-run.lever.model(per.mark=i*0.01, hatchery.size=0.15, sel=j*0.01, Theta.hatch=80, c=c, percent.hatch=percent.hatch, HR=HR, h=h, w=w, mar.surv=0.02, RS=RS, mar.surv.hatch=0.0024)
+  ms<-run.lever.model(per.mark=i*0.01, hatchery.size=0.15, sel=j*0.01, Theta.hatch=80, c=c, percent.hatch=percent.hatch, HR=HR, h=h, w=w, mar.surv=0.02, RS=RS, mar.surv.hatch=0.0024, sex.ratio=sex.ratio)
   ms.hatchery.size<-ms$hatchery.size
   ms.BS<ms$BS[100]
   PNIms[i,j]<-ms$PNI[100]
@@ -57,7 +57,7 @@ for(i in 1:100){
   BSmarkms[i,j]<-ms$BS.mark
   
   #Repeat selective harvest vs hatchery size relationship for 100% marking case
-  sh100<-run.lever.model(per.mark=1.0, hatchery.size=j*0.005, sel=i*0.01, Theta.hatch=80, c=c, percent.hatch=percent.hatch, HR=HR, h=h, w=w, mar.surv=0.02, RS=RS, mar.surv.hatch=0.0024)
+  sh100<-run.lever.model(per.mark=1.0, hatchery.size=j*0.005, sel=i*0.01, Theta.hatch=80, c=c, percent.hatch=percent.hatch, HR=HR, h=h, w=w, mar.surv=0.02, RS=RS, mar.surv.hatch=0.0024, sex.ratio=sex.ratio)
   sh100.per.mark<-sh100$per.mark
   if (i==1){sh100.hatchery.size[j]<-sh100$hatchery.size;  sh100.BS[j]<-sh100$BS[100]}
   PNIsh100[i,j]<-sh100$PNI[100]
@@ -81,22 +81,37 @@ par(mar=c(3,4,3,2), mfrow=c(2,2), oma=c(2,1,2,0.5))
 #par(mar=c(3,4,3,2), mfrow=c(1,1), oma=c(2,1,2,0.5))
 
 #Where are NAs in sh100?
-  BS.mark.NAsh<-outputNAsh100
+  BS.mark.NAsh100<-outputNAsh100
+  Data_DF <- data.frame(Sel=numeric(10000), Hatchery.size=numeric(10000), z=numeric(10000) )
+  Data_DF$Sel <- rep(1:100*0.01, 100)
+  Data_DF$Hatchery.size <- rep(1:100*0.005, each=100)
+  Data_DF$z <- as.vector(BS.mark.NAsh100)
+  InterpListBSNAsh100 <- interp(Data_DF$Sel, Data_DF$Hatchery.size, Data_DF$z, nx=200, ny=200)
+
+  BS.mark.NAsh<-outputNAsh
   Data_DF <- data.frame(Sel=numeric(10000), Hatchery.size=numeric(10000), z=numeric(10000) )
   Data_DF$Sel <- rep(1:100*0.01, 100)
   Data_DF$Hatchery.size <- rep(1:100*0.005, each=100)
   Data_DF$z <- as.vector(BS.mark.NAsh)
   InterpListBSNAsh <- interp(Data_DF$Sel, Data_DF$Hatchery.size, Data_DF$z, nx=200, ny=200)
+  
+  BS.mark.NAmh<-outputNAmh
+  Data_DF <- data.frame(Per.mark=numeric(10000), Hatchery.size=numeric(10000), z=numeric(10000) )
+  Data_DF$Per.mark <- rep(1:100*0.01, 100)
+  Data_DF$Hatchery.size <- rep(1:100*0.005, each=100)
+  Data_DF$z <- as.vector(BS.mark.NAmh)
+  InterpListBSNAmh <- interp(Data_DF$Per.mark, Data_DF$Hatchery.size, Data_DF$z, nx=200, ny=200)
+  # Variables (management levers) to assess: %Marked vs Hatchery size
 
-# Variables (management levers) to assess: %Marked vs Hatchery size
-# Put data in vector form
+  # Put data in vector form
 Data_DF <- data.frame(Per.mark=numeric(10000), Hatchery.size=numeric(10000), z=numeric(10000) )
 Data_DF$Per.mark <- rep(1:100*0.01, 100)
 Data_DF$Hatchery.size <- rep(1:100*0.005, each=100)
 Data_DF$z <- as.vector(outputmh)
 #write.csv(Data_DF, "ContourData_DF.csv")
 
-InterpList <- interp(Data_DF$Per.mark, Data_DF$Hatchery.size, Data_DF$z)
+InterpList <- interp(Data_DF$Per.mark, Data_DF$Hatchery.size, Data_DF$z, nx=200, ny=200)
+InterpList[[3]][which(InterpListBSNAsh[[3]]>0)]<-NA
 
 # get x and y ranges for plotting
 xrange<-range(InterpList[[1]])
@@ -105,7 +120,7 @@ zrange<-range(InterpList[[3]], na.rm=T)
 zlevels<-pretty(zrange,20)
 nlevels<-(length(zlevels))
 
-# make color pallette
+# make color palette
 cp<-colorRampPalette(brewer.pal(9,'Blues'))
 cp4<-rev(cp(nlevels+2)[-c(1,2)])
 if (output.label=="pHOSeff") {cp4<-(cp(nlevels+2)[-c(1,2)])}#(output.label=="pHOSeff") 
@@ -140,6 +155,8 @@ mtext(side=3, text="(No selective removals of marked fish)", line=0.1, cex=0.6, 
 mtext(side=3, text="(a)", line=0.1, cex=0.8, at=0, adj=0)
 #mtext(3, text=paste(output.label, sep=""), line=2, outer=T, cex=1.5)
 
+
+
 # Variables (management levers) to assess: Sel vs Hatchery size
 # Put data in vector form
 Data_DF <- data.frame(Sel=numeric(10000), Hatchery.size=numeric(10000), z=numeric(10000) )
@@ -148,7 +165,8 @@ Data_DF$Hatchery.size <- rep(1:100*0.005, each=100)
 Data_DF$z <- as.vector(outputsh)
 #write.csv(Data_DF, "ContourData_DF.csv")
 
-InterpList <- interp(Data_DF$Sel, Data_DF$Hatchery.size, Data_DF$z)
+InterpList <- interp(Data_DF$Sel, Data_DF$Hatchery.size, Data_DF$z, nx=200, ny=200)
+InterpList[[3]][which(InterpListBSNAsh[[3]]>0)]<-NA
 
 # get x and y ranges for plotting
 xrange<-range(InterpList[[1]])
@@ -196,16 +214,16 @@ mtext(side=3, text="(b)", line=0.1, cex=0.8, at=0, adj=0)
 # if(output.label=="Recruits from river spawners (HOS+NOS)") mtext(side=3, text=expression(paste("Recruits from river spawners (HOS+NOS):Low ", gamma)), line=1.5, outer=F, cex=1.5, at=-0.2)
 # if(output.label=="Recruits from hatchery production") mtext(side=3, text=expression(paste("Recruits from hatchery production:Low ", gamma)), line=1.5, outer=F, cex=1.5, at=-0.2)
 # if(output.label=="Catch") mtext(side=3, text=expression(paste("Catch: Low ", gamma)), line=2, outer=F, cex=1.5, at=-0.2)
-if(scenario=="rs0.2"){
-  if(output.label=="pHOSeff") mtext(side=3, text=expression(paste("pHOSef: LOw", gamma)), line=2, outer=F, cex=1.5, at=-0.2)#(output.label=="pHOSeff") #text=expression('pHOS'[eff])
-  if(output.label=="PNI") mtext(side=3, text=expression(paste("PNI", title)), line=2, outer=F, cex=1.5, at=-0.2)
-  if(output.label=="pNOB") mtext(side=3, text=expression(paste("pNOB", title)), line=2, outer=F, cex=1.5, at=-0.2)
-  if(output.label=="Recruits from river spawners (HOS+NOS)") mtext(side=3, text=expression(paste("Recruits from river spawners (HOS+NOS)", title)), line=1.5, outer=F, cex=1.5, at=-0.2)
-  if(output.label=="Recruits from hatchery production") mtext(side=3, text=expression(paste("Recruits from hatchery production", title)), line=1.5, outer=F, cex=1.5, at=-0.2)
-  if(output.label=="Catch") mtext(side=3, text=expression(paste("Catch", title)), line=2, outer=F, cex=1.5, at=-0.2)
+if(RS!=0.8){
+  if(output.label=="pHOSeff") mtext(side=3, text=expression(paste("pHOSeff: low", gamma)), line=2, outer=F, cex=1.5, at=-0.2)#(output.label=="pHOSeff") #text=expression('pHOS'[eff])
+  if(output.label=="PNI") mtext(side=3, text=expression(paste("PNI: low", gamma)), line=2, outer=F, cex=1.5, at=-0.2)
+  if(output.label=="pNOB") mtext(side=3, text=expression(paste("pNOB: low", gamma)), line=2, outer=F, cex=1.5, at=-0.2)
+  if(output.label=="Recruits from river spawners (HOS+NOS)") mtext(side=3, text=expression(paste("Recruits from river spawners (HOS+NOS): low", gamma)), line=1.5, outer=F, cex=1.5, at=-0.2)
+  if(output.label=="Recruits from hatchery production") mtext(side=3, text=expression(paste("Recruits from hatchery production: low", gamma)), line=1.5, outer=F, cex=1.5, at=-0.2)
+  if(output.label=="Catch") mtext(side=3, text=expression(paste("Catch: low", gamma)), line=2, outer=F, cex=1.5, at=-0.2)
   
 }
-if(scenario!="rs0.2"){
+if(RS==0.8){
   if(output.label=="pHOSeff") mtext(side=3, text=paste("pHOSeff", title, sep=""), line=1.5, outer=F, cex=1.3, at=-0.2)#(output.label=="pHOSeff") #text=expression('pHOS'[eff])
   if(output.label=="PNI") mtext(side=3, text=paste("PNI", title, sep=""), line=1.5, outer=F, cex=1.3, at=-0.2)
   if(output.label=="pNOB") mtext(side=3, text=paste("pNOB", title, sep=""), line=1.5, outer=F, cex=1.3, at=-0.2)
@@ -275,7 +293,7 @@ Data_DF$z <- as.vector(outputsh100)
 #write.csv(Data_DF, "ContourData_DF.csv")
 
 InterpList <- interp(Data_DF$Sel, Data_DF$Hatchery.size, Data_DF$z, nx=200, ny=200)
-InterpList[[3]][which(InterpListBSNAsh[[3]]>0)]<-NA
+InterpList[[3]][which(InterpListBSNAsh100[[3]]>0)]<-NA
 
 
 # get x and y ranges for plotting
@@ -324,13 +342,12 @@ if(output.label=="pNOB"){if(pNOBsh100[1,100]==1){text(x=0.1, y=0.48, labels=c("1
 
 
 #Run Contour Plots
-#pdf(pdf.label)
 #png("PNIbasecase6April2017.png", width=6, height=6, units="in", res=1000)
 #png("PNIhigheritability6April2017.png", width=6, height=6, units="in", res=1000)
 #png("PNIweakselection6April2017.png", width=6, height=6, units="in", res=1000)
 # png("PNIrs0.228Nov2017.png", width=6, height=6, units="in", res=1000)
 png(paste(dir, "PNI", scenario, ".png", sep=""), width=6, height=6, units="in", res=1000)
-outputmh<-PNImh; outputsh<-PNIsh; outputms<-PNIms; outputsh100<-PNIsh100; outputNAsh100<-BSmarksh100; output.label<-"PNI"  #PNI, pHOS, pNOB, RperS, Ret.nat
+outputmh<-PNImh; outputsh<-PNIsh; outputms<-PNIms; outputsh100<-PNIsh100; outputNAsh100<-BSmarksh100; outputNAsh<-BSmarksh;  outputNAmh<-BSmarkmh; output.label<-"PNI"  #PNI, pHOS, pNOB, RperS, Ret.nat
 Do.contours()
 dev.off()
 
@@ -339,7 +356,7 @@ dev.off()
 #png("pHOSweakselection6April2017.png", width=6, height=6, units="in", res=1000)
 # png("pHOSrs0.228Nov2017.png", width=6, height=6, units="in", res=1000)
 png(paste(dir, "pHOS", scenario, ".png", sep=""), width=6, height=6, units="in", res=1000)
-outputmh<-pHOSmh; outputsh<-pHOSsh; outputms<-pHOSms; outputsh100<-pHOSsh100; outputNAsh100<-BSmarksh100; output.label<-"pHOSeff"  #pHOSeff #PNI, pHOS, pNOB, RperS, Ret.nat
+outputmh<-pHOSmh; outputsh<-pHOSsh; outputms<-pHOSms; outputsh100<-pHOSsh100; outputNAsh100<-BSmarksh100; outputNAsh<-BSmarksh; outputNAmh<-BSmarkmh; output.label<-"pHOSeff"  #pHOSeff #PNI, pHOS, pNOB, RperS, Ret.nat
 Do.contours()
 dev.off()
 
@@ -347,8 +364,8 @@ dev.off()
 #png("pNOBhigheritability6April2017.png", width=6, height=6, units="in", res=1000)
 #png("pNOBweakselection6April2017.png", width=6, height=6, units="in", res=1000)
 # png("pNOBrs0.228Nov2017.png", width=6, height=6, units="in", res=1000)
-png(paste(dir, "pNOB", scenario, ".png", paste=""), width=6, height=6, units="in", res=1000)
-outputmh<-pNOBmh; outputsh<-pNOBsh; outputms<-pNOBms; outputsh100<-pNOBsh100; outputNAsh100<-BSmarksh100; output.label<-"pNOB"  #PNI, pHOS, pNOB, RperS, Ret.nat
+png(paste(dir, "pNOB", scenario, ".png", sep=""), width=6, height=6, units="in", res=1000)
+outputmh<-pNOBmh; outputsh<-pNOBsh; outputms<-pNOBms; outputsh100<-pNOBsh100; outputNAsh100<-BSmarksh100; outputNAsh<-BSmarksh; outputNAmh<-BSmarkmh; output.label<-"pNOB"  #PNI, pHOS, pNOB, RperS, Ret.nat
 Do.contours()
 dev.off()
 
@@ -357,7 +374,7 @@ dev.off()
 #png("Retnatweakselection6April2017.png", width=6, height=6, units="in", res=1000)
 # png("Retnatrs0.228Nov2017.png", width=6, height=6, units="in", res=200)
 png(paste(dir, "Retnat", scenario, ".png", sep=""), width=6, height=6, units="in", res=200)
-outputmh<-Ret.natmh; outputsh<-Ret.natsh; outputms<-Ret.natms; outputsh100<-Ret.natsh100; outputNAsh100<-BSmarksh100; output.label<-"Recruits from river spawners (HOS+NOS)"  #PNI, pHOS, pNOB, RperS, Ret.nat
+outputmh<-Ret.natmh; outputsh<-Ret.natsh; outputms<-Ret.natms; outputsh100<-Ret.natsh100; outputNAsh100<-BSmarksh100; outputNAsh<-BSmarksh; outputNAmh<-BSmarkmh; output.label<-"Recruits from river spawners (HOS+NOS)"  #PNI, pHOS, pNOB, RperS, Ret.nat
 Do.contours()
 dev.off()
 
@@ -366,7 +383,7 @@ dev.off()
 #png("Rethatweakselection6April2017.png", width=6, height=6, units="in", res=1000)
 # png("Rethatrs0.228Nov2017.png", width=6, height=6, units="in", res=1000)
 png(paste(dir, "Rethat", scenario, ".png", sep=""), width=6, height=6, units="in", res=1000)
-outputmh<-Ret.hatmh; outputsh<-Ret.hatsh; outputms<-Ret.hatms; outputsh100<-Ret.hatsh100; outputNAsh100<-BSmarksh100; output.label<-"Recruits from hatchery production"  #PNI, pHOS, pNOB, RperS, Ret.nat
+outputmh<-Ret.hatmh; outputsh<-Ret.hatsh; outputms<-Ret.hatms; outputsh100<-Ret.hatsh100; outputNAsh100<-BSmarksh100; outputNAsh<-BSmarksh; outputNAmh<-BSmarkmh; output.label<-"Recruits from hatchery production"  #PNI, pHOS, pNOB, RperS, Ret.nat
 Do.contours()
 dev.off()
 
@@ -375,7 +392,7 @@ dev.off()
 #png("Catchweakselection6April2017.png", width=6, height=6, units="in", res=1000)
 # png("Catchrs0.228Nov2017.png", width=6, height=6, units="in", res=1000)
 png(paste(dir, "Catch", scenario, ".png", sep=""), width=6, height=6, units="in", res=1000)
-outputmh<-Catchmh; outputsh<-Catchsh; outputms<-Catchms; outputsh100<-Catchsh100; outputNAsh100<-BSmarksh100; output.label<-"Catch"  #PNI, pHOS, pNOB, RperS, Ret.nat
+outputmh<-Catchmh; outputsh<-Catchsh; outputms<-Catchms; outputsh100<-Catchsh100; outputNAsh100<-BSmarksh100; outputNAsh<-BSmarksh; outputNAmh<-BSmarkmh; output.label<-"Catch"  #PNI, pHOS, pNOB, RperS, Ret.nat
 Do.contours()
 dev.off()
 
@@ -384,4 +401,4 @@ dev.off()
 
 
 
-}#End of Run.contours<-function(c=c, percent.hatch=percent.hatch, HR=HR, h=h, w=w, pdf.label=pdf.label){
+}#End of Run.contours<-function(c=c, percent.hatch=percent.hatch, HR=HR, h=h, w=w){

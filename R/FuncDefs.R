@@ -42,10 +42,10 @@ Phatch<-function(pNOB, P.hatch.minus1, w, sig, Theta.hatch, h, P.nat.minus1){#Me
   return(P.hatch) 
 }
 
-Hatch.sm<-function(BS, fec, release.surv){#Number of hathchery smolts
+Hatch.sm<-function(BS, fec, sex.ratio, release.surv){#Number of hathchery smolts
   #INPUT: BS=broodstock, fec=fecundity, release.surv=survival from eggs to smolt 
   #OUTPUT: Sm.hatch= number of hatchery smolts
-  Sm.hatch<-BS*fec*release.surv
+  Sm.hatch<-BS*fec*release.surv*sex.ratio
   return(Sm.hatch)
 }
 

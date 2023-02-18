@@ -7,7 +7,7 @@ source("R/SeqFormulationBH.R")
 plot.UnivariateSA<-FALSE
 plot.timeseries<-FALSE
 
-run.lever.model<-function(per.mark,hatchery.size, sel, Theta.hatch, c, percent.hatch, HR, h, w, mar.surv, RS, mar.surv.hatch){
+run.lever.model<-function(per.mark,hatchery.size, sel, Theta.hatch, c, percent.hatch, HR, h, w, mar.surv, RS, mar.surv.hatch, sex.ratio){
 #per.mark=0.75; hatchery.size=0.45; sel=0; Theta.hatch=80; c=40000; percent.hatch=0; HR=0.4; h=sqrt(0.25); w=sqrt(100); mar.surv=0.02; RS=0.8; mar.surv.hatch=0.005
 #per.mark=1.0; hatchery.size=80*0.005; sel=90*0.01; Theta.hatch=80;mar.surv=0.02; RS=0.8; mar.surv.hatch=0.0024
 #per.mark=1.0; hatchery.size=95*0.005; sel=2*0.01; Theta.hatch=80;mar.surv=0.02; RS=0.8; mar.surv.hatch=0.0024
@@ -87,7 +87,7 @@ Req<-Seq
 #BS.set<-pred.hatch.recruits/(fec*release.surv*mar.surv.hatch*(1HR))#The broodstock required to acheive predicted hatchery returns
 
 BS.set<-hatchery.size*Req#Hatchery size as a function of longterm equilibrium recrutimetn in the absence of the hatchery
-ret.hatch.minus1<-BS.set*bs.surv*fec*release.surv*mar.surv.hatch*(1-HR)# Assuming no fitness effects here
+ret.hatch.minus1<-BS.set*bs.surv*sex.ratio*fec*release.surv*mar.surv.hatch*(1-HR)# Assuming no fitness effects here
 
 HOR[1]<-ret.hatch.minus1*(1-percent.hatch)#Hatchery-origin returns to natural spawning grounds
 HOR.mark[1]<-HOR[1]*per.mark
@@ -137,7 +137,7 @@ Sp.nat[1]<-NOS[1]+HOS[1]
 
 fit.smolt[1]<-fit.lifestage(P.nat[1], Theta.nat, w, sig, rel.loss)
 Sm.nat[1]<-BH(HOS[1], NOS[1], RS, p, c)*fit.smolt[1]
-Sm.hatch[1]<-Hatch.sm(BS[1]*bs.surv, fec, release.surv)
+Sm.hatch[1]<-Hatch.sm(BS[1]*bs.surv, fec, sex.ratio, release.surv)
 
 fit.adult[1]<-fit.lifestage(P.nat[1], Theta.nat, w, sig, 1-rel.loss)
 ret.nat[1]<-Sm.nat[1]*mar.surv*fit.adult[1]*(1-HR)#Returns to spawning grounds AFTER harvest
@@ -195,11 +195,11 @@ for (i in 2:100){#for i generations)
   PNI[i]<-pNOB[i]/(pNOB[i]+pHOSEff[i])#pNOB[i]/(pNOB[i]+pHOSEff[i])
   Sp.nat[i]<-NOS[i]+HOS[i]
   
-  P.nat[i]<-Pnat(pHOS[i-1], P.nat[i-1], w, sig, Theta.nat, h, P.hatch[i-1])
+  P.nat[i]<-Pnat(pHOSEff[i-1], P.nat[i-1], w, sig, Theta.nat, h, P.hatch[i-1])
   P.hatch[i]<-Phatch(pNOB[i-1], P.hatch[i-1], w, sig, Theta.hatch, h, P.nat[i-1])
   fit.smolt[i]<-fit.lifestage(P.nat[i], Theta.nat, w, sig, rel.loss)
   Sm.nat[i]<-BH(HOS[i], NOS[i], RS, p, c)*fit.smolt[i]
-  Sm.hatch[i]<-Hatch.sm(BS[i]*bs.surv, fec, release.surv)
+  Sm.hatch[i]<-Hatch.sm(BS[i]*bs.surv, fec, sex.ratio, release.surv)
   
   fit.adult[i]<-fit.lifestage(P.nat[i], Theta.nat, w, sig, 1-rel.loss)
   ret.nat[i]<-Sm.nat[i]*mar.surv*fit.adult[i]*(1-HR)
