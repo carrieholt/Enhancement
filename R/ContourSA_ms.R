@@ -13,7 +13,8 @@ library(akima)
 library(RColorBrewer)
 
 mar.surv.const<-TRUE#Is the marine suvival assumed to be 0.02 when estimating Seq, or derived from inputed marine survival?
-c=400000; percent.hatch=0; HR=0.4; h=sqrt(0.25); w=sqrt(100);RS=0.8; sex.ratio=0.5#pdf.label="Contourplots20Feb2017.pdf"; 
+c=400000; percent.hatch=0; HR=0.4; h=sqrt(0.25); w=sqrt(100);RS=0.8; 
+sex.ratio=0.5; ppn.RR <- 0.33#pdf.label="Contourplots20Feb2017.pdf"; 
 
 mar.surv.vec=c(0.01,0.05,0.02,0.02); mar.surv.hatch.vec=c(0.0024,0.0024,0.001, 0.005)
 for (k in 1:4){
@@ -28,7 +29,7 @@ for (k in 1:4){
 for(i in 1:100){
   print(i)
   for (j in 1:100){
-  mh<-run.lever.model(per.mark=i*0.01, hatchery.size=j*0.005, sel=0, Theta.hatch=80, c=c, percent.hatch=percent.hatch, HR=HR, h=h, w=w, RS=RS, mar.surv=mar.surv, mar.surv.hatch=mar.surv.hatch, sex.ratio=sex.ratio)
+  mh<-run.lever.model(per.mark=i*0.01, hatchery.size=j*0.005, sel=0, Theta.hatch=80, c=c, percent.hatch=percent.hatch, HR=HR, h=h, w=w, RS=RS, mar.surv=mar.surv, mar.surv.hatch=mar.surv.hatch, sex.ratio=sex.ratio, ppn.RR=ppn.RR )
   mh.sel<-mh$sel
   if (i==1){mh.hatchery.size[j]<-mh$hatchery.size; mh.BS[j]<-mh$BS[100]}
   PNImh[i,j]<-mh$PNI[100]
@@ -40,7 +41,7 @@ for(i in 1:100){
   Catchmh[i,j]<-mh$catch[100]
   BSmarkmh[i,j]<-mh$BS.mark
   
-  sh<-run.lever.model(per.mark=0.5, hatchery.size=j*0.005, sel=i*0.01, Theta.hatch=80, c=c, percent.hatch=percent.hatch, HR=HR, h=h, w=w, RS=RS, mar.surv=mar.surv, mar.surv.hatch=mar.surv.hatch, sex.ratio=sex.ratio)
+  sh<-run.lever.model(per.mark=0.5, hatchery.size=j*0.005, sel=i*0.01, Theta.hatch=80, c=c, percent.hatch=percent.hatch, HR=HR, h=h, w=w, RS=RS, mar.surv=mar.surv, mar.surv.hatch=mar.surv.hatch, sex.ratio=sex.ratio, ppn.RR=ppn.RR )
   sh.per.mark<-sh$per.mark
   if (i==1){sh.hatchery.size[j]<-sh$hatchery.size;  sh.BS[j]<-sh$BS[100]}
   PNIsh[i,j]<-sh$PNI[100]
@@ -52,7 +53,7 @@ for(i in 1:100){
   Catchsh[i,j]<-sh$catch[100]
   BSmarksh[i,j]<-sh$BS.mark
   
-  ms<-run.lever.model(per.mark=i*0.01, hatchery.size=0.1, sel=j*0.01, Theta.hatch=80, c=c, percent.hatch=percent.hatch, HR=HR, h=h, w=w, RS=RS, mar.surv=mar.surv, mar.surv.hatch=mar.surv.hatch, sex.ratio=sex.ratio)
+  ms<-run.lever.model(per.mark=i*0.01, hatchery.size=0.1, sel=j*0.01, Theta.hatch=80, c=c, percent.hatch=percent.hatch, HR=HR, h=h, w=w, RS=RS, mar.surv=mar.surv, mar.surv.hatch=mar.surv.hatch, sex.ratio=sex.ratio, ppn.RR=ppn.RR)
   ms.hatchery.size<-ms$hatchery.size
   ms.BS<ms$BS[100]
   PNIms[i,j]<-ms$PNI[100]
@@ -62,7 +63,7 @@ for(i in 1:100){
   Ret.natms[i,j]<-ms$ret.nat.preharvest[100]
   Ret.hatms[i,j]<-ms$ret.hatch.preharvest[100]
   Catchms[i,j]<-ms$catch[100]
-  BSmarksh[i,j]<-sh$BS.mark
+  BSmarkms[i,j]<-ms$BS.mark
   }
 }
 #if(k==1)lowhms.lowmshatch<-list( mh.sel=mh.sel, mh.hatchery.size=mh.hatchery.size, mh.BS=mh.BS, sh.per.mark=sh.per.mark, sh.hatchery.size=sh.hatchery.size, sh.BS=sh.BS, ms.hatchery.size=ms.hatchery.size, ms.BS=ms.BS, PNImh=PNImh, PNIsh=PNIsh, PNIms=PNIms, Ret.natmh=Ret.natmh, Ret.natsh=Ret.natsh, Ret.natms=Ret.natms, Ret.hatmh=Ret.hatmh, Ret.hatsh=Ret.hatsh, Ret.hatms=Ret.hatms, pNOBmh=pNOBmh, pNOBsh=pNOBsh, pNOBms=pNOBms, pHOSmh=pHOSmh, pHOSsh=pHOSsh, pHOSms=pHOSms)  

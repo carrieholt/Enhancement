@@ -1,5 +1,5 @@
 #Code to estimate effect of 3 hatchery levers: harchery size, marking, and selective harvest
-#Last updated 13 Feb. 2017
+#Last updated 23 Feb. 2017
 #rm(list = ls())
 
 source("R/FuncDefs.R")
@@ -7,15 +7,13 @@ source("R/SeqFormulationBH.R")
 plot.UnivariateSA<-FALSE
 plot.timeseries<-FALSE
 
-run.lever.model<-function(per.mark,hatchery.size, sel, Theta.hatch, c, percent.hatch, HR, h, w, mar.surv, RS, mar.surv.hatch, sex.ratio){
-#per.mark=0.75; hatchery.size=0.45; sel=0; Theta.hatch=80; c=40000; percent.hatch=0; HR=0.4; h=sqrt(0.25); w=sqrt(100); mar.surv=0.02; RS=0.8; mar.surv.hatch=0.005
-#per.mark=1.0; hatchery.size=80*0.005; sel=90*0.01; Theta.hatch=80;mar.surv=0.02; RS=0.8; mar.surv.hatch=0.0024
-#per.mark=1.0; hatchery.size=95*0.005; sel=2*0.01; Theta.hatch=80;mar.surv=0.02; RS=0.8; mar.surv.hatch=0.0024
-  
-#Levers
-#per.mark<-1.0#Percentage of hatchery origin fish that are marked
-#hatchery.size<-0.1#Hatchery size as a ppn of equilibrium capacity (Seq) of natural spawners
-#sel<-0#Selective removals/harvest
+run.lever.model<-function(per.mark,hatchery.size, sel, Theta.hatch, c, percent.hatch, HR, h, w, mar.surv, RS, mar.surv.hatch, sex.ratio, ppn.RR){
+
+# Levers
+# per.mark<-1.0 #Percentage of hatchery origin fish that are marked
+# hatchery.size<-0.1 #Hatchery size as a ppn of equilibrium capacity (Seq) of natural spawners
+# sel<-0#Selective removals/harvest
+# ppn.RR <- 0.33 # allowable take of total returns to river in a given year for BS
   
 #Biological Parameters
 p<-175#Beverton-Holt productivity parameter
@@ -94,8 +92,8 @@ HOR.mark[1]<-HOR[1]*per.mark
 HOR.unmark[1]<-HOR[1]*(1-per.mark)#Number of HOR that are unmarked
 HOR.rem[1]<-HOR[1]*per.mark*sel#Number of marked HOR that are selectively removed
 
-if(BS.set>(0.33*(HOR[1]+Seq-HOR.rem[1]))){BS[1]<-0.33*(HOR[1]+Seq-HOR.rem[1])}
-if(BS.set<=(0.33*(HOR[1]+Seq-HOR.rem[1]))){BS[1]<-BS.set}
+if(BS.set>(ppn.RR*(HOR[1]+Seq-HOR.rem[1]))){BS[1]<-ppn.RR*(HOR[1]+Seq-HOR.rem[1])}
+if(BS.set<=(ppn.RR*(HOR[1]+Seq-HOR.rem[1]))){BS[1]<-BS.set}
 
 
 ppn.unmarked.spawners[1]<-(HOR.unmark[1]+Seq)/(HOR.unmark[1]+HOR.mark[1]*(1-sel)+Seq)
@@ -155,14 +153,18 @@ for (i in 2:100){#for i generations)
   HOR.rem[i]<-HOR.mark[i]*sel#Number of marked HOR that are selectively removed
 
   if(ret.nat[i-1]>0){
+    # We limited the total broodstock to less than a third of the total 
+    # returns to the river in any given year to avoid conservation concerns 
+    # from removing too many fish for brood.
+    if(BS.set>(ppn.RR*(ret.nat[i-1]+HOR[i]-HOR.rem[i]))){BS[i]<-ppn.RR*(ret.nat[i-1]+HOR[i]-HOR.rem[i])}
+    if(BS.set<=(ppn.RR*(ret.nat[i-1]+HOR[i]-HOR.rem[i]))){BS[i]<-BS.set}
     
-    if(BS.set>(0.33*(ret.nat[i-1]+HOR[i]-HOR.rem[i]))){BS[i]<-0.33*(ret.nat[i-1]+HOR[i]-HOR.rem[i])}
-    if(BS.set<=(0.33*(ret.nat[i-1]+HOR[i]-HOR.rem[i]))){BS[i]<-BS.set}
     if(i==100){if(BS[i]==BS.set){BS.mark<-0}; if(BS[i]!=BS.set){BS.mark<-1}}
     ppn.unmarked.spawners[i]<-(HOR.unmark[i]+ret.nat[i-1])/(HOR.unmark[i]+HOR.mark[i]*(1-sel)+ret.nat[i-1])
     if(ppn.unmarked.spawners[i]*BS[i]*3>=BS[i]){# If brood can be collected from unmarked fish with a limit of handling effort to sample size of 3XBS 
       NOS[i]<-ret.nat[i-1]-BS[i]*(ret.nat[i-1]/(HOR.unmark[i]+ret.nat[i-1]))#substract the portion of BS that is natural-origin
-      if(NOS[i]<0)cat(NOS[i])#NOS[i]<-0
+      #How is this negative?
+      if(NOS[i]<0){cat(NOS[i])}#NOS[i]<-0
       HOS[i]<-HOR.unmark[i]+HOR.mark[i]*(1-sel)-BS[i]*(HOR.unmark[i]/(HOR.unmark[i]+ret.nat[i-1]))#substract the portion of BS that is hatchery-origin
       pNOB[i]<-(ret.nat[i-1])/(ret.nat[i-1]+HOR.unmark[i])#HOR.unmark[i])#wild spawners/wild spawners + unmarked hatchery spawners. BS taken entirely from spawning grounds
     }#End of if(ppn.unmarked.spawners[i]*BS[i]*3>BS[i]){
@@ -226,7 +228,7 @@ if(ext==1){
   return(list(fit.smolt=fit.smolt, P.nat=P.nat, P.hatch=P.hatch, Theta.hatch=Theta.hatch, Theta.nat=Theta.nat, Sp.nat=Sp.nat, ret.nat=ret.nat, ret.nat.preharvest=ret.nat.preharvest, ret.hatch.preharvest=ret.hatch.preharvest, catch=catch, BS=rep(BS.set,100), Seq=Seq, NOS=NOS, NOB=NOB, HOS=HOS, HOB=HOB, pNOB=pNOB, pHOS=pHOS, PNI=PNI, per.mark=per.mark, hatchery.size=hatchery.size, RperS=RperS, sel=sel, mar.surv=mar.surv, c=c, pHOSeff=pHOSEff, fit.adult=fit.adult, BS.mark=BS.mark))
 }#End of run.lever.model
 
-panel.plots.lever<-function(){
+panel.plots.lever<-function(res, res.nogenetics){
 
 par(mfrow=c(3,2), mar=c(4,4,2,1))
 plot(1:100,res$fit.smolt^2, type="l", ylim=c(0,1), ylab="Fitness", xlab="Generation")
@@ -273,18 +275,25 @@ text(x=2, y=y.upper.lim*0.95, labels="(f)")
 }
 
 if(plot.timeseries==TRUE){
-pdf("TimeseriesLevers19Jan2017.pdf")
-res<-run.lever.model(per.mark=1.0,hatchery.size=0.3, sel=0, Theta.hatch=80, c=400000, percent.hatch=0, HR=0.4, h=sqrt(0.25), w=sqrt(100), mar.surv=0.02, RS=0.8, mar.surv.hatch=0.0024)#per.mark,hatchery.size, sel, Theta.hatch, c, percent.hatch, HR, h, w
-res.nogenetics<-run.lever.model(per.mark=1.0,hatchery.size=0.3, sel=0, Theta.hatch=100, c=400000, percent.hatch=0, HR=0.4, h=sqrt(0.25), w=sqrt(100), mar.surv=0.02, RS=0.8, mar.surv.hatch=0.0024)
-panel.plots.lever()
+#pdf("TimeseriesLevers19Jan2017.pdf")
+# pdf("TimeseriesLevers.pdf")
+dir <- here::here("Results")
+scenario <- "pHOSeff"#"pHOSeff"# "pHOS"
+png(paste(dir, "/TimeseriesLevers", scenario, ".png", sep=""), width=6, height=6, units="in", res=1000)
+# pdf(paste(dir, "/TimeseriesLevers", scenario, ".pdf", sep=""))
+res<-run.lever.model(per.mark=1.0,hatchery.size=0.3, sel=0, Theta.hatch=80, c=400000, percent.hatch=0, HR=0.4, h=sqrt(0.25), w=sqrt(100), mar.surv=0.02, RS=0.8, mar.surv.hatch=0.0024, sex.ratio=0.5)#per.mark,hatchery.size, sel, Theta.hatch, c, percent.hatch, HR, h, w
+res.nogenetics<-run.lever.model(per.mark=1.0,hatchery.size=0.3, sel=0, Theta.hatch=100, c=400000, percent.hatch=0, HR=0.4, h=sqrt(0.25), w=sqrt(100), mar.surv=0.02, RS=0.8, mar.surv.hatch=0.0024, sex.ratio=0.5)
+panel.plots.lever(res=res, res.nogenetics=res.nogenetics)
 
-res<-run.lever.model(per.mark=1.0,hatchery.size=0.3, sel=0.5, Theta.hatch=80, c=400000, percent.hatch=0, HR=0.4, h=sqrt(0.25), w=sqrt(100), mar.surv=0.02, RS=0.8, mar.surv.hatch=0.0024)
-res.nogenetics<-run.lever.model(per.mark=1.0,hatchery.size=0.3, sel=0.5, Theta.hatch=100, c=400000, percent.hatch=0, HR=0.4, h=sqrt(0.25), w=sqrt(100), mar.surv=0.02, RS=0.8, mar.surv.hatch=0.0024)
-panel.plots.lever()
-
-res<-run.lever.model(per.mark=0.5,hatchery.size=0.3, sel=0.5, Theta.hatch=80, c=400000, percent.hatch=0, HR=0.4, h=sqrt(0.25), w=sqrt(100), mar.surv=0.02, RS=0.8, mar.surv.hatch=0.0024)
-res.nogenetics<-run.lever.model(per.mark=0.5,hatchery.size=0.3, sel=0.5, Theta.hatch=100, c=400000, percent.hatch=0, HR=0.4, h=sqrt(0.25), w=sqrt(100), mar.surv=0.02, RS=0.8, mar.surv.hatch=0.0024)
-panel.plots.lever()
+# # sel = 0.5
+# res<-run.lever.model(per.mark=1.0,hatchery.size=0.3, sel=0.5, Theta.hatch=80, c=400000, percent.hatch=0, HR=0.4, h=sqrt(0.25), w=sqrt(100), mar.surv=0.02, RS=0.8, mar.surv.hatch=0.0024, sex.ratio=0.5)
+# res.nogenetics<-run.lever.model(per.mark=1.0,hatchery.size=0.3, sel=0.5, Theta.hatch=100, c=400000, percent.hatch=0, HR=0.4, h=sqrt(0.25), w=sqrt(100), mar.surv=0.02, RS=0.8, mar.surv.hatch=0.0024, sex.ratio=0.5)
+# panel.plots.lever(res=res, res.nogenetics=res.nogenetics)
+# 
+# #per.mark = 0.5; sel = 0.5
+# res<-run.lever.model(per.mark=0.5,hatchery.size=0.3, sel=0.5, Theta.hatch=80, c=400000, percent.hatch=0, HR=0.4, h=sqrt(0.25), w=sqrt(100), mar.surv=0.02, RS=0.8, mar.surv.hatch=0.0024, sex.ratio=0.5)
+# res.nogenetics<-run.lever.model(per.mark=0.5,hatchery.size=0.3, sel=0.5, Theta.hatch=100, c=400000, percent.hatch=0, HR=0.4, h=sqrt(0.25), w=sqrt(100), mar.surv=0.02, RS=0.8, mar.surv.hatch=0.0024, sex.ratio=0.5)
+# panel.plots.lever(res=res, res.nogenetics=res.nogenetics)
 dev.off()
 }
 
@@ -293,7 +302,7 @@ if(plot.UnivariateSA==TRUE){
 
 PNIm<-NA; pHOSm<-NA; pNOBm<-NA; RperSm<-NA; Ret.natm<-NA; PNIs<-NA; pHOSs<-NA; pNOBs<-NA; RperSs<-NA; Ret.nats<-NA; PNIh<-NA; pHOSh<-NA; pNOBh<-NA; BSh<-NA; RperSh<-NA; Ret.nath<-NA;  
 for(i in 1:100){
-  m<-run.lever.model(per.mark=i*0.01, hatchery.size=0.3, sel=0, Theta.hatch=80, c=400000, percent.hatch=0, HR=0.4, h=sqrt(0.5), w=sqrt(100), mar.surv=0.02, RS=0.8, mar.surv.hatch=0.0024)
+  m<-run.lever.model(per.mark=i*0.01, hatchery.size=0.3, sel=0, Theta.hatch=80, c=400000, percent.hatch=0, HR=0.4, h=sqrt(0.5), w=sqrt(100), mar.surv=0.02, RS=0.8, mar.surv.hatch=0.0024, sex.ratio=0.5)
   m.BS<-m$BS
   m.hatchery.size<-m$hatchery.size
   m.sel<-m$sel
@@ -302,7 +311,7 @@ for(i in 1:100){
   pNOBm[i]<-m$pNOB[100]
   RperSm[i]<-m$RperS[100]
   Ret.natm[i]<-m$ret.nat.preharvest[100]
-  s<-run.lever.model(per.mark=0.1, hatchery.size=0.3, sel=i*0.01, Theta.hatch=80, c=400000, percent.hatch=0, HR=0.4, h=sqrt(0.5), w=sqrt(100), mar.surv=0.02, RS=0.8, mar.surv.hatch=0.0024)
+  s<-run.lever.model(per.mark=0.1, hatchery.size=0.3, sel=i*0.01, Theta.hatch=80, c=400000, percent.hatch=0, HR=0.4, h=sqrt(0.5), w=sqrt(100), mar.surv=0.02, RS=0.8, mar.surv.hatch=0.0024, sex.ratio=0.5)
   s.BS<-s$BS
   s.hatchery.size<-s$hatchery.size
   s.per.mark<-s$per.mark
@@ -311,7 +320,7 @@ for(i in 1:100){
   pNOBs[i]<-s$pNOB[100]
   RperSs[i]<-s$RperS[100]  
   Ret.nats[i]<-s$ret.nat.preharvest[100]  
-  h<-run.lever.model(per.mark=0.1, hatchery.size=i*0.003, sel=0, Theta.hatch=80, c=400000, percent.hatch=0, HR=0.4, h=sqrt(0.5), w=sqrt(100), mar.surv=0.02, RS=0.8, mar.surv.hatch=0.0024)
+  h<-run.lever.model(per.mark=0.1, hatchery.size=i*0.003, sel=0, Theta.hatch=80, c=400000, percent.hatch=0, HR=0.4, h=sqrt(0.5), w=sqrt(100), mar.surv=0.02, RS=0.8, mar.surv.hatch=0.0024, sex.ratio=0.5)
   h.per.mark<-h$per.mark
   h.sel<-h$sel
   BSh[i]<-h$BS[100]

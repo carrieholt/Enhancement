@@ -32,7 +32,9 @@ for (ms.scenario in 1:4){
   Ret.nat.NAsh<-input$Ret.natsh
   Ret.nat.NAms<-input$Ret.natms
   BS.mark.NAsh<-input$BSmarksh
- 
+  BS.mark.NAmh<-input$BSmarkmh
+  BS.mark.NAms<-input$BSmarkms
+  
   indmh<-NA;indsh<-NA; indms<-NA
 # Variables (management levers) to assess: %Marked vs Hatchery size
   Data_DF <- data.frame(Per.mark=numeric(10000), Hatchery.size=numeric(10000), z=numeric(10000) )
@@ -53,13 +55,25 @@ for (ms.scenario in 1:4){
   Data_DF$z <- as.vector(Ret.nat.NAms)
   InterpListNAms <- interp(Data_DF$Per.mark, Data_DF$Sel, Data_DF$z, nx=40, ny=40)
 
+ # NAs where brook take exceeds 33% of returns to river. Now masking these values (Feb 2023)
   Data_DF <- data.frame(Sel=numeric(10000), Hatchery.size=numeric(10000), z=numeric(10000) )
   Data_DF$Sel <- rep(1:100*0.01, 100)
   Data_DF$Hatchery.size <- rep(1:100*0.005, each=100)
   Data_DF$z <- as.vector(BS.mark.NAsh)
   InterpListBSNAsh <- interp(Data_DF$Sel, Data_DF$Hatchery.size, Data_DF$z, nx=40, ny=40)
 
-
+  Data_DF <- data.frame(Per.mark=numeric(10000), Hatchery.size=numeric(10000), z=numeric(10000) )
+  Data_DF$Per.mark <- rep(1:100*0.01, 100)
+  Data_DF$Hatchery.size <- rep(1:100*0.005, each=100)
+  Data_DF$z <- as.vector(BS.mark.NAmh)
+  InterpListBSNAmh <- interp(Data_DF$Per.mark, Data_DF$Hatchery.size, Data_DF$z, nx=40, ny=40)
+  
+  Data_DF <- data.frame(Per.mark=numeric(10000), Sel=numeric(10000), z=numeric(10000) )
+  Data_DF$Per.mark <- rep(1:100*0.01, 100)
+  Data_DF$Sel <- rep(1:100*0.01, each=100)
+  Data_DF$z <- as.vector(BS.mark.NAms)
+  InterpListBSNAms <- interp(Data_DF$Per.mark, Data_DF$Sel, Data_DF$z, nx=40, ny=40)
+  
   # Variables (management levers) to assess: %Marked vs Hatchery size
   # Put data in vector form
   Data_DF <- data.frame(Per.mark=numeric(10000), Hatchery.size=numeric(10000), z=numeric(10000) )
@@ -68,8 +82,8 @@ for (ms.scenario in 1:4){
   Data_DF$z <- as.vector(outputmh)
   
   InterpList <- interp(Data_DF$Per.mark, Data_DF$Hatchery.size, Data_DF$z, nx=40, ny=40)
-  #if(metric!="Ret.nat"){InterpList[[3]][which(InterpListNAmh[[3]]<2)]<-NA}
-  InterpList[[3]][which(InterpListNAmh[[3]]<2)]<-NA  
+  # Mask where extinct and  where bs exceeds 33% of returns to river
+  InterpList[[3]][which(InterpListNAmh[[3]]<2|InterpListBSNAmh[[3]]>0)]<-NA  
 
   # get x and y ranges for plotting
   xrange<-range(InterpList[[1]])
@@ -136,7 +150,7 @@ for (ms.scenario in 1:4){
   Data_DF$z <- as.vector(outputsh)
   
   InterpList <- interp(Data_DF$Sel, Data_DF$Hatchery.size, Data_DF$z, nx=40, ny=40)
-  #if(metric!="Ret.nat"){InterpList[[3]][which(InterpListNAsh[[3]]<2)]<-NA}
+  # Mask where extinct and  where bs exceeds 33% of returns to river
   InterpList[[3]][which(InterpListNAsh[[3]]<2|InterpListBSNAsh[[3]]>0)]<-NA
 
   # get x and y ranges for plotting
@@ -200,8 +214,8 @@ for (ms.scenario in 1:4){
   Data_DF$z <- as.vector(outputms)
   
   InterpList <- interp(Data_DF$Per.mark, Data_DF$Sel, Data_DF$z, nx=40, ny=40)
-  #if(metric!="Ret.nat"){InterpList[[3]][which(InterpListNAms[[3]]<2)]<-NA}
-  InterpList[[3]][which(InterpListNAms[[3]]<2)]<-NA
+  # Mask where extinct and  where bs exceeds 33% of returns to river
+  InterpList[[3]][which(InterpListNAms[[3]]<2|InterpListBSNAms[[3]]>0)]<-NA
 
   # get x and y ranges for plotting
   xrange<-range(InterpList[[1]])
@@ -253,6 +267,7 @@ for (ms.scenario in 1:4){
 # png("PNIms21April2017.png", width=6, height=6, units="in", res=1000)
 #png(here::here("Results", "2018", "SensitivityAnalyses" , "PNIms.png"), width=6, height=6, units="in", res=1000)
 png(here::here("Results", "UpdatedSexRatiopHOSeff", "SensitivityAnalyses" , "PNIms.png"), width=6, height=6, units="in", res=1000)
+# png(here::here("Results", "ppnReturnsRiver", "SensitivityAnalyses" , "PNIms.png"), width=6, height=6, units="in", res=1000)
 par(mfcol=c(3,4), oma=c(2,1,2,0.5))
 plot.3x4(metric="PNI")
 dev.off()
