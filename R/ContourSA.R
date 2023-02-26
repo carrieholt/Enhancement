@@ -21,7 +21,7 @@ for(i in 1:100){
   mh.sel<-mh$sel
   if (i==1){mh.hatchery.size[j]<-mh$hatchery.size; mh.BS[j]<-mh$BS[100]}
   PNImh[i,j]<-mh$PNI[100]
-  pHOSmh[i,j]<-mh$pHOSeff[100]#eff
+  pHOSmh[i,j]<-mh$pHOSeff[100]
   pNOBmh[i,j]<-mh$pNOB[100]
   RperSmh[i,j]<-mh$RperS[100]
   Ret.natmh[i,j]<-mh$ret.nat.preharvest[100]
@@ -34,7 +34,7 @@ for(i in 1:100){
   sh.per.mark<-sh$per.mark
   if (i==1){sh.hatchery.size[j]<-sh$hatchery.size;  sh.BS[j]<-sh$BS[100]}
   PNIsh[i,j]<-sh$PNI[100]
-  pHOSsh[i,j]<-sh$pHOSeff[100]#eff
+  pHOSsh[i,j]<-sh$pHOSeff[100]
   pNOBsh[i,j]<-sh$pNOB[100]
   RperSsh[i,j]<-sh$RperS[100]  
   Ret.natsh[i,j]<-sh$ret.nat.preharvest[100]  
@@ -47,7 +47,7 @@ for(i in 1:100){
   ms.hatchery.size<-ms$hatchery.size
   ms.BS<ms$BS[100]
   PNIms[i,j]<-ms$PNI[100]
-  pHOSms[i,j]<-ms$pHOSeff[100]#eff
+  pHOSms[i,j]<-ms$pHOSeff[100]
   pNOBms[i,j]<-ms$pNOB[100]
   RperSms[i,j]<-ms$RperS[100]
   Ret.natms[i,j]<-ms$ret.nat.preharvest[100]
@@ -61,7 +61,7 @@ for(i in 1:100){
   sh100.per.mark<-sh100$per.mark
   if (i==1){sh100.hatchery.size[j]<-sh100$hatchery.size;  sh100.BS[j]<-sh100$BS[100]}
   PNIsh100[i,j]<-sh100$PNI[100]
-  pHOSsh100[i,j]<-sh100$pHOSeff[100]#eff
+  pHOSsh100[i,j]<-sh100$pHOSeff[100]
   pNOBsh100[i,j]<-sh100$pNOB[100]
   RperSsh100[i,j]<-sh100$RperS[100]  
   Ret.natsh100[i,j]<-sh100$ret.nat.preharvest[100]  

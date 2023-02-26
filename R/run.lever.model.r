@@ -1,194 +1,345 @@
-#Code to estimate effect of 3 hatchery levers: harchery size, marking, and selective harvest
-#Last updated 23 Feb. 2017
-#rm(list = ls())
+# Function to estimate effect of 3 hatchery levers: hatchery size, marking, and 
+# selective harvest, based on HSRG model of genetic impacts of hatcheries on 
+# fitness
+# Code documented in Withler et al. 2018 CSAS Res. Doc.
+# Last updated 23 Feb. 2023
 
+# Source base functions
 source("R/FuncDefs.R")
 source("R/SeqFormulationBH.R")
+
 plot.UnivariateSA<-FALSE
 plot.timeseries<-FALSE
 
-run.lever.model<-function(per.mark,hatchery.size, sel, Theta.hatch, c, percent.hatch, HR, h, w, mar.surv, RS, mar.surv.hatch, sex.ratio, ppn.RR){
+run.lever.model<-function( per.mark, hatchery.size, sel, Theta.hatch, c, 
+                           percent.hatch, HR, h, w, mar.surv, RS, 
+                           mar.surv.hatch, sex.ratio, ppn.RR){
 
-# Levers
-# per.mark<-1.0 #Percentage of hatchery origin fish that are marked
-# hatchery.size<-0.1 #Hatchery size as a ppn of equilibrium capacity (Seq) of natural spawners
+# # Levers
+# per.mark <- 1.0 #Percentage of hatchery origin fish that are marked
+# hatchery.size <- 0.1 #Hatchery size as a ppn of equilibrium capacity (Seq) of 
+# #  natural spawners
 # sel<-0#Selective removals/harvest
-# ppn.RR <- 0.33 # allowable take of total returns to river in a given year for BS
+# ppn.RR <- 0.33 #allowable take of total returns to river per year for BS
   
-#Biological Parameters
-p<-175#Beverton-Holt productivity parameter
-#c<-400000#Beverton-Holt capacity parameter (Rmax)
-#mar.surv<-0.02# Marine survival of natural-origin fish
-#RS<-0.8#Relative survival/fecundity of hatchery vs. natural-origin spawners in natural environment in BH model
+# Biological Parameters
+p <- 175#Beverton-Holt productivity parameter
+# c <- 400000#Beverton-Holt capacity parameter (Rmax)
+# mar.surv <- 0.02# Marine survival of natural-origin fish
+# RS <- 0.8#Relative survival/fecundity of hatchery vs. natural-origin spawners 
+# # in natural environment in BH model
 
-#Hatchery parameters
-bs.surv<-0.80#survival from capture to spawning for broodstock
-fec<-4900#fecundity
-release.surv<-0.88# combined survival of hatchery fish from egg-fry and fry-smolt
-#mar.surv.hatch<-0.0024 #Marine survival of hatchery-origin fish
-#percent.hatch<-0# 1-percent of hatchery fish that return to natural spawning grounds. Look at a range of values
-rel.loss<-0.5#Ppn of fitness loss at smolt stage (compared with adult stage)
-#HR<-0.4#Harvest rate
+# Hatchery Parameters
+bs.surv <- 0.80 #survival from capture to spawning for broodstock
+fec <- 4900 #fecundity
+release.surv <- 0.88 #combined survival of hatchery fish from egg-fry and 
+# fry-smolt
+# mar.surv.hatch <- 0.0024 #Marine survival of hatchery-origin fish
+# percent.hatch <- 0 # 1-percent of hatchery fish that return to natural 
+# # spawning grounds. Look at a range of values
+rel.loss <- 0.5 #Ppn of fitness loss at smolt stage (compared with adult stage)
+#HR <- 0.4 #Harvest rate
 
 #Genetic parameters
-sig<-sqrt(10)
-#w<-sqrt(100)
-#h<-sqrt(0.5)
-Theta.nat<-100
-#Theta.hatch<-80
+sig <- sqrt(10)
+#w <- sqrt(100) #Selection
+#h <- sqrt(0.5) #Heritability
+Theta.nat <- 100
+#Theta.hatch <- 80
 
-#Set up vectors
-P.nat<-NA#Mean phenotypic value in natural environment
-P.hatch<-NA#Mean phenotypic value in the hatchery
-HOS<-NA
-HOR<-NA#Hatchery-origin returns
-HOR.unmark<-NA
-HOR.mark<-NA
-HOR.rem<-NA
-PNI<-NA
-pHOS<-NA
-pHOSEff<-NA
-pNOB<-NA
-NOS<-NA
-HOB<-NA
-NOB<-NA
-ret.nat<-NA#Returns to the spawning grounds AFTER harvest
-ret.nat.preharvest<-NA#Returns to the spawning grounds PRIOR TO harvest
-ret.hatch<-NA#Returns to the hatchery AFTER harvest
-ret.hatch.preharvest<-NA#Returns to the hatchery PRIOR TO harvest
-BS<-NA#Brood stock
-BS.mark<-NA
-ppn.unmarked.spawners<-NA
-Sp.nat<-NA#Total spawners in the natural environment
-Sm.nat<-NA#Total smolts from the natural environment
-Sm.hatch<-NA#Total smolts from the hatchery
-fit.smolt<-NA#fitness mulitiplier at smolt stage
-fit.adult<-NA#fitness mulitiplier at adult stage
-RperS<-NA#Recruits from natural spawners  prior to harvest /(natural spawners=HOS+NOS)
-catch<-NA
-ext<-0
+#Initialize vectors
+P.nat <- NA #Mean phenotypic value in natural environment
+P.hatch <- NA #Mean phenotypic value in the hatchery
+HOS <- NA
+HOR <- NA #Hatchery-origin returns
+HOR.unmark <- NA
+HOR.mark <- NA
+HOR.rem <- NA
+PNI <- NA
+pHOS <- NA
+pHOSEff <- NA
+pNOB <- NA
+NOS <- NA
+HOB <- NA
+NOB <- NA
+ret.nat <- NA #Returns to the spawning grounds AFTER harvest
+ret.nat.preharvest <- NA #Returns to the spawning grounds PRIOR TO harvest
+ret.hatch <- NA #Returns to the hatchery AFTER harvest
+ret.hatch.preharvest <- NA #Returns to the hatchery PRIOR TO harvest
+BS <- NA #Brood stock collected after considering limit on ppn.RR
+BS.mark <- NA # Target brook stock before considering limit on ppn.RR
+ppn.unmarked.spawners <- NA
+Sp.nat <- NA #Total spawners in the natural environment
+Sm.nat <- NA #Total smolts from the natural environment
+Sm.hatch <- NA #Total smolts from the hatchery
+fit.smolt <- NA #fitness mulitiplier at smolt stage
+fit.adult <- NA #fitness mulitiplier at adult stage
+RperS <- NA #Recruits from natural spawners  prior to harvest /
+# (natural spawners=HOS+NOS)
+catch <- NA
+ext <- 0
 
 #Initial parameters
-P.nat[1]<-Theta.nat
-P.hatch[1]<-Theta.nat
-Seq<-(c*mar.surv*(1-HR))*((p*mar.surv*(1-HR))-1)/(p*mar.surv*(1-HR)) #Assuming BH formulation #2 from Hilborn and Walters (1992), spawner abundances at equilibrium adult recruitment# See "SeqFormulation.r"
-if(mar.surv.const==TRUE){Seq<-(c*0.02*(1-HR))*((p*0.02*(1-HR))-1)/(p*0.02*(1-HR)) #Assuming BH formulation #2 from Hilborn and Walters (1992), spawner abundances at equilibrium adult recruitment# See "SeqFormulation.r"
+P.nat[1] <- Theta.nat
+P.hatch[1] <- Theta.nat
+# Seq assuming BH formulation #2 from Hilborn and Walters (1992), spawner 
+# abundances at equilibrium adult recruitment# See "SeqFormulation.r"
+Seq <- (c*mar.surv*(1-HR)) * ((p*mar.surv * (1 - HR)) - 1) / 
+  (p * mar.surv * (1 - HR)) 
+if (mar.surv.const == TRUE){
+  Seq <- (c*0.02 * (1 - HR)) * ((p * 0.02 * (1 - HR))-1) / (p * 0.02*(1 - HR)) 
   }
-Req<-Seq
+Req <- Seq
 
-#Dynamics
-#Brood stock estimation in year prior to the first generation, required to estimate hatchery returns and HOS
-#pred.hatch.recruits<-solver.HS(hatchery.size, HR, RS, p, c, mar.surv,percent.hatch,  fec, release.surv, mar.surv.hatch, bs.surv)$fit
-#NR.check<-ratio.func(pred.hatch.recruits, hatchery.size, HR, RS, p, c, mar.surv,percent.hatch,  fec, release.surv, mar.surv.hatch, bs.surv)$Ret#just to CHECK what solver used for total natural returns
-#HOS.check<-ratio.func(pred.hatch.recruits, hatchery.size, HR, RS, p, c, mar.surv,percent.hatch,  fec, release.surv, mar.surv.hatch, bs.surv)$HOS[100]#just to CHECK what solver used for total natural returns
-#NOS.check<-ratio.func(pred.hatch.recruits, hatchery.size, HR, RS, p, c, mar.surv,percent.hatch,  fec, release.surv, mar.surv.hatch, bs.surv)$NOS[100]#just to CHECK what solver used for total natural returns
-#BS.set<-pred.hatch.recruits/(fec*release.surv*mar.surv.hatch*(1HR))#The broodstock required to acheive predicted hatchery returns
+# ----------------------------------------------------------------------------
+# Population Dynamics
+# ----------------------------------------------------------------------------
 
-BS.set<-hatchery.size*Req#Hatchery size as a function of longterm equilibrium recrutimetn in the absence of the hatchery
-ret.hatch.minus1<-BS.set*bs.surv*sex.ratio*fec*release.surv*mar.surv.hatch*(1-HR)# Assuming no fitness effects here
+# NOT USED:
+# Brood stock estimation in year prior to the first generation, required to 
+# estimate hatchery returns and HOS
+# pred.hatch.recruits<-solver.HS(hatchery.size, HR, RS, p, c, mar.surv,percent.hatch,  fec, release.surv, mar.surv.hatch, bs.surv)$fit
+# NR.check<-ratio.func(pred.hatch.recruits, hatchery.size, HR, RS, p, c, mar.surv,percent.hatch,  fec, release.surv, mar.surv.hatch, bs.surv)$Ret#just to CHECK what solver used for total natural returns
+# HOS.check<-ratio.func(pred.hatch.recruits, hatchery.size, HR, RS, p, c, mar.surv,percent.hatch,  fec, release.surv, mar.surv.hatch, bs.surv)$HOS[100]#just to CHECK what solver used for total natural returns
+# NOS.check<-ratio.func(pred.hatch.recruits, hatchery.size, HR, RS, p, c, mar.surv,percent.hatch,  fec, release.surv, mar.surv.hatch, bs.surv)$NOS[100]#just to CHECK what solver used for total natural returns
+# BS.set<-pred.hatch.recruits/(fec*release.surv*mar.surv.hatch*(1HR))#The broodstock required to acheive predicted hatchery returns
 
-HOR[1]<-ret.hatch.minus1*(1-percent.hatch)#Hatchery-origin returns to natural spawning grounds
-HOR.mark[1]<-HOR[1]*per.mark
-HOR.unmark[1]<-HOR[1]*(1-per.mark)#Number of HOR that are unmarked
-HOR.rem[1]<-HOR[1]*per.mark*sel#Number of marked HOR that are selectively removed
+# Hatchery size as a function of long-term equilibrium recruitment in the 
+# absence of the hatchery
+BS.set <- hatchery.size * Req
+ret.hatch.minus1 <- BS.set * bs.surv * sex.ratio * fec * release.surv * 
+  mar.surv.hatch *(1 - HR) # Assuming no fitness in the first year 
 
-if(BS.set>(ppn.RR*(HOR[1]+Seq-HOR.rem[1]))){BS[1]<-ppn.RR*(HOR[1]+Seq-HOR.rem[1])}
-if(BS.set<=(ppn.RR*(HOR[1]+Seq-HOR.rem[1]))){BS[1]<-BS.set}
+# Hatchery-origin returns to natural spawning grounds
+HOR[1] <- ret.hatch.minus1 * (1 - percent.hatch)
+# Number of HOR that are marked and unmarked
+HOR.mark[1] <- HOR[1] * per.mark
+HOR.unmark[1] <- HOR[1] * (1 - per.mark) 
+#Number of marked HOR that are selectively removed
+HOR.rem[1] <- HOR[1] * per.mark * sel 
 
+# BS is equal to BS.set unless BS.set is larger than ppn.RR * returns to river
+if (BS.set > (ppn.RR * (HOR[1] + Seq - HOR.rem[1]) ) ){
+  BS[1] <- ppn.RR * (HOR[1] + Seq - HOR.rem[1])
+  }
+if (BS.set <= (ppn.RR * (HOR[1] + Seq - HOR.rem[1]) ) ){
+  BS[1]<-BS.set
+  }
 
-ppn.unmarked.spawners[1]<-(HOR.unmark[1]+Seq)/(HOR.unmark[1]+HOR.mark[1]*(1-sel)+Seq)
-if(ppn.unmarked.spawners[1]*BS[1]*3>=BS[1]){# If brood can be collected from unmarked fish with a limit of handling effort to sample size of 3XBS 
+# What is the ppn of spawners that are unmarked?
+ppn.unmarked.spawners [1] <- (HOR.unmark[1] + Seq) / 
+  (HOR.unmark[1] + HOR.mark[1] * (1 - sel) + Seq)
 
-  pNOB[1]<-Seq/(Seq+HOR.unmark[1])#(Seq)/(Seq+HOR.unmark[1])#wild spawners/wild spawners + unmarked hatchery spawners
-  NOS[1]<-Seq-BS[1]*(Seq/((HOR.unmark[1]+Seq)))#only a portion of BS since some come from unmarked hatchery fish
-  if(NOS[1]<0)NOS[1]<-0
-  HOS[1]<-HOR[1]-HOR.rem[1]-BS[1]*(HOR.unmark[1]/((HOR.unmark[1]+Seq)))#also subtract  brood take in proportion that HOR provide marked fish to returns
+# If brood can be collected from unmarked fish with a limit of handling effort 
+# to sample size of 3 X BS 
+if (ppn.unmarked.spawners[1] * BS[1] * 3 >= BS[1]){
+  # pNOB is #wild spawners/wild spawners + unmarked hatchery spawners
+  pNOB[1] <- Seq / (Seq + HOR.unmark[1])
+  # NOS includes only a portion of BS since some come from unmarked hatchery fish
+  NOS[1] <- Seq - BS[1] * (Seq / ((HOR.unmark[1] + Seq)))
+  if(NOS[1] < 0) NOS[1]<-0
+  # HOS must subtract brood take in proportion that HOR provide marked fish to 
+  # returns
+  HOS[1] <- HOR[1] - HOR.rem[1] - BS[1] * (HOR.unmark[1] / 
+                                             (HOR.unmark[1] + Seq))
   
 }#End of if(ppn.unmarked.spawners[1]*BS[1]*3>BS[1]){
 
-if(ppn.unmarked.spawners[1]*BS[1]*3<BS[1]){#If brood cannot be collected from unmarked fish with a limit on handling effort to sample size of  3XBS
-  BS.underhandling<-ppn.unmarked.spawners[1]*BS[1]*3#Number of unmarked BS taken within handling limits (<BS.set)
-  ppnBS.overhandling<-1-BS.underhandling/BS[1]# Proprtion of BS taken after handling limit exceeded. BS taken in the ratio of HOR and NOR occuring
-  ppnBS.underhandling<-BS.underhandling/BS[1]# Proportion of BS taken before handling limit exceeded. BS taken in the ration of unmarked HOR and NOR occuring
+# If brood cannot be collected from unmarked fish with a limit on handling 
+# effort to sample size of  3XBS
+if(ppn.unmarked.spawners[1] * BS[1] * 3 < BS[1]) {
+  #Number of unmarked BS taken within handling limits (<BS.set)
+  BS.underhandling <- ppn.unmarked.spawners[1] * BS[1] * 3
+  # Proportion of BS taken after handling limit exceeded. BS taken in the ratio 
+  # of HOR and NOR occurring 
+  ppnBS.overhandling <- 1 - BS.underhandling / BS[1]
+  # Proportion of BS taken before handling limit exceeded. BS taken in the 
+  # ration of unmarked HOR and NOR occurring
+  ppnBS.underhandling <- BS.underhandling / BS[1]
   
-  BS.NO.underhandling<-BS[1]*(Seq/((HOR.unmark[1]+Seq)))*ppnBS.underhandling
-  BS.NO.overhandling<-BS[1]*(Seq/(HOR[1]-HOR.rem[1]+Seq))*ppnBS.overhandling
-  BS.HO.underhandling<-BS[1]*(HOR.unmark[1]/((HOR.unmark[1]+Seq)))*ppnBS.underhandling
-  BS.HO.overhandling<-BS[1]*((HOR[1]-HOR.rem[1])/(HOR[1]-HOR.rem[1]+Seq))*ppnBS.overhandling
+  BS.NO.underhandling <- BS[1] * 
+    (Seq / (HOR.unmark[1] + Seq) ) * ppnBS.underhandling
+  BS.NO.overhandling <- BS[1] * 
+    (Seq / (HOR[1] - HOR.rem[1] + Seq) ) * ppnBS.overhandling
+  BS.HO.underhandling <- BS[1] * 
+    (HOR.unmark[1] / (HOR.unmark[1] + Seq) ) * ppnBS.underhandling
+  BS.HO.overhandling <- BS[1] * 
+    ((HOR[1] - HOR.rem[1]) / (HOR[1] - HOR.rem[1] + Seq) ) * ppnBS.overhandling
   
-  NOS[1]<-Seq -  BS.NO.underhandling -  BS.NO.overhandling
+  NOS [1] <- Seq - BS.NO.underhandling - BS.NO.overhandling
   #if(NOS[1]<0)NOS[1]<-0
 
-  pNOB[1]<-Seq/(Seq+HOR.unmark[1])*ppnBS.underhandling + Seq/(Seq+HOR[1]-HOR.rem[1])*ppnBS.overhandling #combing pNOB for ppn fish prior to and after limit exceeded
-  HOS[1]<-HOR[1]-HOR.rem[1]- BS.HO.underhandling - BS.HO.overhandling# subtract  brood take
+  # Combing pNOB for ppn fish prior to and after limit exceeded
+  pNOB[1] <- Seq / (Seq + HOR.unmark[1] ) * ppnBS.underhandling + 
+    Seq / (Seq + HOR[1] - HOR.rem[1]) * ppnBS.overhandling 
+  # HOS is HOR minus selectively harvested fish and brood take
+  HOS[1] <- HOR[1] - HOR.rem[1] - BS.HO.underhandling - BS.HO.overhandling
   
 }#End of if(ppn.unmarked.spawners[1]*BS[1]*3<BS[1]){
 
 
-NOB[1]<-BS[1]*pNOB[1]
-HOB[1]<-BS[1]*(1-pNOB[1])
-pHOS[1]<-HOS[1]/(HOS[1]+NOS[1])
-pHOSEff[1]<-HOS[1]*RS/(HOS[1]*RS+NOS[1])
-PNI[1]<-pNOB[1]/(pNOB[1]+pHOS[1])
+NOB[1] <- BS[1] * pNOB[1]
+HOB[1] <- BS[1] * (1 - pNOB[1])
+pHOS[1] <- HOS[1] / (HOS[1] + NOS[1])
+pHOSEff[1] <- HOS[1] * RS / (HOS[1] * RS + NOS[1])
+PNI[1] <- pNOB [1] / (pNOB[1] + pHOS[1])
 
-Sp.nat[1]<-NOS[1]+HOS[1]
+Sp.nat[1] <- NOS[1] + HOS[1]
 
-fit.smolt[1]<-fit.lifestage(P.nat[1], Theta.nat, w, sig, rel.loss)
-Sm.nat[1]<-BH(HOS[1], NOS[1], RS, p, c)*fit.smolt[1]
-Sm.hatch[1]<-Hatch.sm(BS[1]*bs.surv, fec, sex.ratio, release.surv)
+fit.smolt[1] <- fit.lifestage( P.nat[1], Theta.nat, w, sig, rel.loss)
+Sm.nat[1] <- BH(HOS[1], NOS[1], RS, p, c) * fit.smolt[1]
+Sm.hatch[1] <- Hatch.sm( BS[1] * bs.surv, fec, sex.ratio, release.surv)
 
-fit.adult[1]<-fit.lifestage(P.nat[1], Theta.nat, w, sig, 1-rel.loss)
-ret.nat[1]<-Sm.nat[1]*mar.surv*fit.adult[1]*(1-HR)#Returns to spawning grounds AFTER harvest
-ret.hatch.preharvest[1]<-Sm.hatch[1]*mar.surv.hatch#Returns to hatchery AFTER harvest
-ret.hatch[1]<-Sm.hatch[1]*mar.surv.hatch*(1-HR)#Returns to hatchery AFTER harvest
-ret.nat.preharvest[1]<-Sm.nat[1]*mar.surv*fit.adult[1]
-RperS[1]<-ret.nat.preharvest[1]/(HOS[1]+NOS[1])
-catch[1]<-(ret.hatch.preharvest[1]+ret.nat.preharvest[1])*HR + ret.hatch[1]*(1-percent.hatch)*(per.mark)*sel#Includes harvest + fish selectively removed from river after harvest
+fit.adult[1] <- fit.lifestage( P.nat[1], Theta.nat, w, sig, 1 - rel.loss)
+# Returns to spawning grounds AFTER harvest
+ret.nat[1] <- Sm.nat[1] * mar.surv * fit.adult[1] * (1-HR)
+#Returns to hatchery BEFORE harvest
+ret.hatch.preharvest[1] <- Sm.hatch[1] * mar.surv.hatch
+#Returns to hatchery AFTER harvest
+ret.hatch[1] <- Sm.hatch[1] * mar.surv.hatch * (1 - HR)
+#Returns to hatchery BEFORE harvest
+ret.nat.preharvest[1] <- Sm.nat[1] * mar.surv * fit.adult[1]
+RperS[1] <- ret.nat.preharvest[1] / (HOS[1] + NOS[1])
+# Catch includes harvest + fish selectively removed from river after harvest
+catch[1] <- (ret.hatch.preharvest[1] + ret.nat.preharvest[1]) * HR + 
+  ret.hatch[1] * (1 - percent.hatch) * (per.mark) * sel
 
 for (i in 2:100){#for i generations)
-  if(ext==0){#If population NOT extirpated (natural population extirpated because fitness impacts and 100% hatchery fish removed prior to spawning)
-  HOR[i]<-ret.hatch[i-1]*(1-percent.hatch)#Hatchery-origin returns to natural spawning grounds
-  HOR.unmark[i]<-HOR[i]*(1-per.mark)#Number of HOR that are unmarked
-  HOR.mark[i]<-HOR[i]*(per.mark)#Number of HOR that are unmarked
-  HOR.rem[i]<-HOR.mark[i]*sel#Number of marked HOR that are selectively removed
+  # If population NOT extirpated (natural population extirpated because fitness 
+  # impacts and 100% hatchery fish removed prior to spawning)
+  if (ext == 0) {
+    # Hatchery-origin returns to natural spawning grounds
+    HOR[i] <- ret.hatch[i-1] * (1 - percent.hatch) 
+    HOR.unmark[i] <- HOR[i] * (1 - per.mark) # Number of HOR that are unmarked
+    HOR.mark[i] <- HOR[i] * (per.mark) # Number of HOR that are unmarked
+    #Number of marked HOR that are selectively removed
+    HOR.rem[i] <- HOR.mark[i] * sel 
 
-  if(ret.nat[i-1]>0){
-    # We limited the total broodstock to less than a third of the total 
-    # returns to the river in any given year to avoid conservation concerns 
-    # from removing too many fish for brood.
-    if(BS.set>(ppn.RR*(ret.nat[i-1]+HOR[i]-HOR.rem[i]))){BS[i]<-ppn.RR*(ret.nat[i-1]+HOR[i]-HOR.rem[i])}
-    if(BS.set<=(ppn.RR*(ret.nat[i-1]+HOR[i]-HOR.rem[i]))){BS[i]<-BS.set}
+    if(ret.nat[i-1]>0){
+      # We limited the total broodstock to less than a third of the total 
+      # returns to the river in any given year to avoid conservation concerns 
+      # from removing too many fish for brood.
+      if (BS.set > (ppn.RR * (ret.nat[i-1] + HOR[i] - HOR.rem[i]) ) ) {
+        BS[i] <- ppn.RR * (ret.nat[i-1] + HOR[i] - HOR.rem[i])
+        }
+      if (BS.set <= (ppn.RR * (ret.nat[i-1] + HOR[i] - HOR.rem[i]) ) ) {
+        BS[i] <- BS.set
+        }
     
-    if(i==100){if(BS[i]==BS.set){BS.mark<-0}; if(BS[i]!=BS.set){BS.mark<-1}}
-    ppn.unmarked.spawners[i]<-(HOR.unmark[i]+ret.nat[i-1])/(HOR.unmark[i]+HOR.mark[i]*(1-sel)+ret.nat[i-1])
-    if(ppn.unmarked.spawners[i]*BS[i]*3>=BS[i]){# If brood can be collected from unmarked fish with a limit of handling effort to sample size of 3XBS 
-      NOS[i]<-ret.nat[i-1]-BS[i]*(ret.nat[i-1]/(HOR.unmark[i]+ret.nat[i-1]))#substract the portion of BS that is natural-origin
-      #How is this negative?
-      if(NOS[i]<0){cat(NOS[i])}#NOS[i]<-0
-      HOS[i]<-HOR.unmark[i]+HOR.mark[i]*(1-sel)-BS[i]*(HOR.unmark[i]/(HOR.unmark[i]+ret.nat[i-1]))#substract the portion of BS that is hatchery-origin
-      pNOB[i]<-(ret.nat[i-1])/(ret.nat[i-1]+HOR.unmark[i])#HOR.unmark[i])#wild spawners/wild spawners + unmarked hatchery spawners. BS taken entirely from spawning grounds
-    }#End of if(ppn.unmarked.spawners[i]*BS[i]*3>BS[i]){
-  
-    if(ppn.unmarked.spawners[i]*BS[i]*3<BS[i]){#If brood cannot be collected from unmarked fish with a limit on handling effort to sample size of  3XBS
-      #cat("handling limit reached in generation, with hatchery size, %mark, sel", i, hatchery.size, per.mark, sel )
-      BS.underhandling<-ppn.unmarked.spawners[i]*BS[i]*3#Number of unmarked BS taken within handling limits (<BS[i])
-      ppnBS.overhandling<-1-BS.underhandling/BS[i]# Proprtion of BS taken after handling limit exceeded. BS taken in the ratio of HOR and NOR occuring
-      ppnBS.underhandling<-BS.underhandling/BS[i]# Proportion of BS taken before handling limit exceeded. BS taken in the ration of unmarked HOR and NOR occuring
-    
-      BS.NO.underhandling<-BS[i]*(ret.nat[i-1]/((HOR.unmark[i]+ret.nat[i-1])))*ppnBS.underhandling
-      BS.NO.overhandling<-BS[i]*(ret.nat[i-1]/(HOR[i]-HOR.rem[i]+ret.nat[i-1]))*ppnBS.overhandling
-      BS.HO.underhandling<-BS[i]*(HOR.unmark[i]/((HOR.unmark[i]+ret.nat[i-1])))*ppnBS.underhandling
-      BS.HO.overhandling<-BS[i]*((HOR[i]-HOR.rem[i])/(HOR[i]-HOR.rem[i]+ret.nat[i-1]))*ppnBS.overhandling
-    
-      NOS[i]<-ret.nat[i-1]- BS.NO.underhandling -  BS.NO.overhandling
-      #if(NOS[i]<0)NOS[i]<-0
-      pNOB[i]<-(ret.nat[i-1])/(ret.nat[i-1]+HOR.unmark[i])*ppnBS.underhandling + (ret.nat[i-1])/(ret.nat[i-1]+HOR[i]-HOR.rem[i])*ppnBS.overhandling#combing pNOB for unmarked component and marked component (which as pNOB=0)  
-      HOS[i]<-HOR[i]-HOR.rem[i]- BS.HO.underhandling - BS.HO.overhandling#subtract  brood take  
-    }#End of if(ppn.unmarked.spawners[i]*BS[i]*3<BS[i]){
+      # Check if BS (and handing limit?) are actually available on the spawning 
+      # grounds. Sometimes BS.set is a allowed by ppn.RR rule, but can't be 
+      # achieved because there are no/too few unmarked spawners
+      
+      # BS.mark indicates if the target bs identified in 'hatchery.size' 
+      # management lever is achieved in the last year/equilibrium state. In 
+      # some cases (BS.mark =1), the limitation of BS<1/3 of returns to river is 
+      # used exclusively over 100 generations
+      if (i == 100) {
+        if (BS[i] == BS.set) {BS.mark <- 0}
+        if (BS[i] != BS.set) {BS.mark <- 1}
+        }
+      
+      # The ppn of unmarked spawner
+      ppn.unmarked.spawners[i] <- (HOR.unmark[i] + ret.nat[i-1]) / 
+        (HOR.unmark[i] + HOR.mark[i] * (1 - sel) + ret.nat[i-1])
+      
+      # Can brood  be collected from unmarked fish with a limit of handling 
+      # effort to sample size of 3XBS?
+      handling.limit <- BS[i] * 3
+      
+      # If handling limit is available on the spawning grounds, sample for BS
+      if ( handling.limit <  
+           (HOR.unmark[i] + HOR.mark[i] * (1 - sel) + ret.nat[i-1]) ){
+        
+        # If handling limits are not exceeded to find unmarked brood for the BS 
+        # target given ppn of unmarked spawners, then collect unmarked BS
+        if ( (ppn.unmarked.spawners[i] * handling.limit) >= BS[i]) {
+          # NOS is natural returns minus the portion of BS that is natural-origin
+          NOS[i] <- ret.nat[i-1] - 
+            BS[i] * (ret.nat[i-1] / (HOR.unmark[i] + ret.nat[i-1]))
+          # Can the brood be collected from unmarked fish within a limit of the 
+          # total number unmarked spawners on the spawning grounds?
+          # If not, NOS is negative
+          if (NOS[i] < 0) {browser(); cat(NOS[i])} #NOS[i]<-0
+          
+          # HOS is HORs minus the portion of BS that is hatchery-origin
+          HOS[i] <- HOR.unmark[i] + HOR.mark[i] * (1 - sel) - 
+            BS[i] * (HOR.unmark[i] / (HOR.unmark[i] + ret.nat[i-1]) )
+          
+          # Brood are taken from unmarked fish only, on the spawning grounds
+          # pNOB is natrual return/natural return + unmarked hatchery spawners
+          pNOB[i]<-(ret.nat[i-1])/(ret.nat[i-1]+HOR.unmark[i])
+        }#End of if(ppn.unmarked.spawners[i]*BS[i]*3>BS[i]){
+        
+        #If brood cannot be collected from unmarked fish with a limit on 
+        # handling effort to sample size of  3XBS
+        if(ppn.unmarked.spawners[i] * BS[i] * 3 < BS[i]) {
+          #Number of unmarked BS taken within handling limits (<BS[i])
+          BS.underhandling <- ppn.unmarked.spawners[i] * BS[i] * 3
+          # Proportion of BS taken after handling limit exceeded. BS taken in 
+          # the ratio of HOR and NOR occurring
+          ppnBS.overhandling <- 1 - BS.underhandling / BS[i]
+          # Proportion of BS taken before handling limit exceeded. BS taken in 
+          # the ration of unmarked HOR and NOR occurring
+          ppnBS.underhandling <- BS.underhandling/BS[i]
+          
+          BS.NO.underhandling <- BS[i] * 
+            (ret.nat[i-1] / ( (HOR.unmark[i] + ret.nat[i-1]) ) ) * 
+            ppnBS.underhandling
+          
+          BS.NO.overhandling <- BS[i] * 
+            (ret.nat[i-1] / (HOR[i] - HOR.rem[i] + ret.nat[i-1]) ) * 
+            ppnBS.overhandling
+          
+          BS.HO.underhandling <- BS[i] * 
+            (HOR.unmark[i] / ( (HOR.unmark[i] + ret.nat[i-1]) ) ) * 
+            ppnBS.underhandling
+          
+          BS.HO.overhandling <- BS[i] * 
+            ((HOR[i] - HOR.rem[i]) / (HOR[i] - HOR.rem[i] + ret.nat[i-1])) * 
+            ppnBS.overhandling
+          
+          NOS[i] <- ret.nat[i-1] - BS.NO.underhandling -  BS.NO.overhandling
+          #if(NOS[i]<0)NOS[i]<-0
+          
+          # Combing pNOB for unmarked component and marked component 
+          pNOB[i] <- (ret.nat[i-1]) / 
+            (ret.nat[i-1] + HOR.unmark[i]) * ppnBS.underhandling + 
+            (ret.nat[i-1]) / 
+            (ret.nat[i-1] + HOR[i] - HOR.rem[i]) * ppnBS.overhandling
+          HOS[i] <- HOR[i] - HOR.rem[i] - BS.HO.underhandling - 
+            BS.HO.overhandling
+          #subtract  brood take  
+        }#End of if(ppn.unmarked.spawners[i]*BS[i]*3<BS[i]){
+        
+      } # End of if (handling.limit > 
 
+      # If handling limit is NOT available on the spawning grounds,
+      if ( handling.limit >=  
+           (HOR.unmark[i] + HOR.mark[i] * (1 - sel) + ret.nat[i-1]) ){
+        BS.NO <- BS[i] * 
+          (ret.nat[i-1] / (HOR[i] - HOR.rem[i] + ret.nat[i-1]) ) 
+        BS.HO <- BS[i] * 
+          ((HOR[i] - HOR.rem[i]) / (HOR[i] - HOR.rem[i] + ret.nat[i-1])) 
+        
+        NOS[i] <- ret.nat[i-1] - BS.NO
+        #if(NOS[i]<0)NOS[i]<-0
+        
+        pNOB[i] <- (ret.nat[i-1]) / (ret.nat[i-1]+HOR[i]-HOR.rem[i]) 
+        HOS[i] <- HOR[i] - HOR.rem[i] - BS.HO
+        #subtract  brood take  
+        
+      } # End of if ( handling.limit <= 
+      
   }#End of if(ret.nat[i-1]>0)
   
-  if(ret.nat[i-1]<=0){ppn.unmarked.spawners[i]<-0; NOS[i]<-0; HOS[i]<-HOR[i]-HOR.rem[i]; pNOB[i]<-0; ext<-1}#And BS[i]=BS[i] (not 0.33 of ret.nat+HOR)
+  if(ret.nat[i-1]<=0){
+    ppn.unmarked.spawners[i]<-0; 
+    NOS[i]<-0; 
+    HOS[i]<-HOR[i]-HOR.rem[i]; 
+    pNOB[i]<-0; 
+    ext<-1
+    }#And BS[i]=BS[i] (not 0.33 of ret.nat+HOR)
   
   NOB[i]<-BS[i]*pNOB[i]
   HOB[i]<-BS[i]*(1-pNOB[i])
