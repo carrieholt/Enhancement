@@ -136,14 +136,14 @@ cp4_grey<-rev(cp_grey(nlevels+2)[-c(1,2)])#Not implemented
 plot(NA, xlim=xrange,ylim=yrange, frame=F, axes=F,xaxs="i", yaxs="i", xlab="", ylab="")
 .filled.contour(x=InterpList[[1]],y=InterpList[[2]], z=InterpList[[3]], levels = pretty(zrange, nlevels) ,cp4) 
 if(output.label=="PNI"|output.label=="pNOB")
-  {.filled.contour(x=InterpList[[1]],y=InterpList[[2]], z=InterpList[[3]], levels = c(0,0.5, 0.72,1) ,cp4[c(1,nlevels/2, nlevels)])} 
+  {.filled.contour(x=InterpList[[1]],y=InterpList[[2]], z=InterpList[[3]], levels = c(0,0.5, 0.8,1) ,cp4[c(1,nlevels/2, nlevels)])} 
 if(output.label=="pHOSeff")#"pHOSeff")
-  {.filled.contour(x=InterpList[[1]],y=InterpList[[2]], z=InterpList[[3]], levels = c(0, 0.28,0.5,1) ,cp4[c(round(nlevels/3), nlevels/1.5, nlevels)])} 
+  {.filled.contour(x=InterpList[[1]],y=InterpList[[2]], z=InterpList[[3]], levels = c(0, 0.19,0.5,1) ,cp4[c(round(nlevels/3), nlevels/1.5, nlevels)])} 
 contour(x=InterpList[[1]],y=InterpList[[2]], z=InterpList[[3]], labcex=0.6, xlab="", ylab="", nlevels=5, add=TRUE)
 if(output.label=="PNI"|output.label=="pNOB")
-  {contour(x=InterpList[[1]],y=InterpList[[2]], z=InterpList[[3]], labcex=0.6, xlab="", ylab="", level=c(0.72, 0.5), add=TRUE, lty=c("dashed", "dotted"), lwd=c(2,2))}
+  {contour(x=InterpList[[1]],y=InterpList[[2]], z=InterpList[[3]], labcex=0.6, xlab="", ylab="", level=c(0.8, 0.5), add=TRUE, lty=c("dashed", "dotted"), lwd=c(2,2))}
 if(output.label=="pHOSeff")#(output.label=="pHOSeff") 
-  {contour(x=InterpList[[1]],y=InterpList[[2]], z=InterpList[[3]], labcex=0.6, xlab="", ylab="", level=c(0.28, 0.5), add=TRUE, lty=c("dashed", "dotted"), lwd=c(2,2))}
+  {contour(x=InterpList[[1]],y=InterpList[[2]], z=InterpList[[3]], labcex=0.6, xlab="", ylab="", level=c(0.19, 0.5), add=TRUE, lty=c("dashed", "dotted"), lwd=c(2,2))}
 usr<-par("usr")
 axis(1); axis(2)
 int<-pretty(mh.BS,n=3)
@@ -191,14 +191,14 @@ cp4_grey<-rev(cp_grey(nlevels+2)[-c(1,2)])#Not implemented
 plot(NA, xlim=xrange,ylim=yrange, frame=F, axes=F,xaxs="i", yaxs="i", xlab="", ylab="")
 .filled.contour(x=InterpList[[1]],y=InterpList[[2]], z=InterpList[[3]], levels = pretty(zrange, nlevels) ,cp4) 
 if(output.label=="PNI"|output.label=="pNOB")
-  {.filled.contour(x=InterpList[[1]],y=InterpList[[2]], z=InterpList[[3]], levels = c(0,0.5, 0.72,1) ,cp4[c(1,nlevels/2, nlevels)])} 
+  {.filled.contour(x=InterpList[[1]],y=InterpList[[2]], z=InterpList[[3]], levels = c(0,0.5, 0.8,1) ,cp4[c(1,nlevels/2, nlevels)])} 
 if(output.label=="pHOSeff")#(output.label=="pHOSeff") 
-  {.filled.contour(x=InterpList[[1]],y=InterpList[[2]], z=InterpList[[3]], levels = c(0, 0.28,0.5,1) ,cp4[c(round(nlevels/3), nlevels/1.5, nlevels)])} 
+  {.filled.contour(x=InterpList[[1]],y=InterpList[[2]], z=InterpList[[3]], levels = c(0, 0.19,0.5,1) ,cp4[c(round(nlevels/3), nlevels/1.5, nlevels)])} 
 contour(x=InterpList[[1]],y=InterpList[[2]], z=InterpList[[3]], labcex=0.6, xlab="", ylab="", nlevels=5, add=TRUE)
 if(output.label=="PNI"|output.label=="pNOB")
-  {contour(x=InterpList[[1]],y=InterpList[[2]], z=InterpList[[3]], labcex=0.6, xlab="", ylab="", level=c(0.72, 0.5), add=TRUE, lty=c("dashed", "dotted"), lwd=c(2,2))}
+  {contour(x=InterpList[[1]],y=InterpList[[2]], z=InterpList[[3]], labcex=0.6, xlab="", ylab="", level=c(0.8, 0.5), add=TRUE, lty=c("dashed", "dotted"), lwd=c(2,2))}
 if(output.label=="pHOSeff")#(output.label=="pHOSeff") 
-  {contour(x=InterpList[[1]],y=InterpList[[2]], z=InterpList[[3]], labcex=0.6, xlab="", ylab="", level=c(0.28, 0.5), add=TRUE, lty=c("dashed", "dotted"), lwd=c(2,2))}
+  {contour(x=InterpList[[1]],y=InterpList[[2]], z=InterpList[[3]], labcex=0.6, xlab="", ylab="", level=c(0.19, 0.5), add=TRUE, lty=c("dashed", "dotted"), lwd=c(2,2))}
 usr<-par("usr")
 axis(1); axis(2)
 int<-pretty(mh.BS,n=3)
@@ -282,14 +282,14 @@ if(sum(is.na(InterpList[[3]])) != (200*200)){ #If not all NAs, then plot
   plot(NA, xlim=xrange,ylim=yrange, frame=F, axes=F,xaxs="i", yaxs="i", xlab="", ylab="")
   .filled.contour(x=InterpList[[1]],y=InterpList[[2]], z=InterpList[[3]], levels = pretty(zrange, nlevels) ,cp4) 
   if(output.label=="PNI"|output.label=="pNOB")
-  {.filled.contour(x=InterpList[[1]],y=InterpList[[2]], z=InterpList[[3]], levels = c(0,0.5, 0.72,1), cp4[c(1,nlevels/2, nlevels)])} 
+  {.filled.contour(x=InterpList[[1]],y=InterpList[[2]], z=InterpList[[3]], levels = c(0,0.5, 0.8,1), cp4[c(1,nlevels/2, nlevels)])} 
   if(output.label=="pHOSeff")#(output.label=="pHOSeff") 
-  {.filled.contour(x=InterpList[[1]],y=InterpList[[2]], z=InterpList[[3]], levels = c(0, 0.28,0.5,1) ,cp4[c(round(nlevels/3), nlevels/1.5, nlevels)])} 
+  {.filled.contour(x=InterpList[[1]],y=InterpList[[2]], z=InterpList[[3]], levels = c(0, 0.19,0.5,1) ,cp4[c(round(nlevels/3), nlevels/1.5, nlevels)])} 
   contour(x=InterpList[[1]],y=InterpList[[2]], z=InterpList[[3]], labcex=0.6, xlab="", ylab="", nlevels=6, add=TRUE)
   if(output.label=="PNI"|output.label=="pNOB")
-  {contour(x=InterpList[[1]],y=InterpList[[2]], z=InterpList[[3]], labcex=0.6, xlab="", ylab="", level=c(0.72, 0.5), add=TRUE, lty=c("dashed", "dotted"), lwd=c(2,2))}
+  {contour(x=InterpList[[1]],y=InterpList[[2]], z=InterpList[[3]], labcex=0.6, xlab="", ylab="", level=c(0.8, 0.5), add=TRUE, lty=c("dashed", "dotted"), lwd=c(2,2))}
   if(output.label=="pHOSeff")#(output.label=="pHOSeff") 
-  {contour(x=InterpList[[1]],y=InterpList[[2]], z=InterpList[[3]], labcex=0.6, xlab="", ylab="", level=c(0.28, 0.5), add=TRUE, lty=c("dashed", "dotted"), lwd=c(2,2))}
+  {contour(x=InterpList[[1]],y=InterpList[[2]], z=InterpList[[3]], labcex=0.6, xlab="", ylab="", level=c(0.19, 0.5), add=TRUE, lty=c("dashed", "dotted"), lwd=c(2,2))}
   usr<-par("usr")
   axis(1); axis(2)
   abline(h=usr[3], v=usr[1])
@@ -331,14 +331,14 @@ cp4_grey<-rev(cp_grey(nlevels+2)[-c(1,2)])#Not implemented
 plot(NA, xlim=xrange,ylim=yrange, frame=F, axes=F,xaxs="i", yaxs="i", xlab="", ylab="")
 .filled.contour(x=InterpList[[1]],y=InterpList[[2]], z=InterpList[[3]], levels = pretty(zrange, nlevels) ,cp4) 
 if(output.label=="PNI"|output.label=="pNOB")
-{.filled.contour(x=InterpList[[1]],y=InterpList[[2]], z=InterpList[[3]], levels = c(0,0.5, 0.72,1) ,cp4[c(1,nlevels/2, nlevels)])} 
+{.filled.contour(x=InterpList[[1]],y=InterpList[[2]], z=InterpList[[3]], levels = c(0,0.5, 0.8,1) ,cp4[c(1,nlevels/2, nlevels)])} 
 if(output.label=="pHOSeff")#(output.label=="pHOSeff") 
-{.filled.contour(x=InterpList[[1]],y=InterpList[[2]], z=InterpList[[3]], levels = c(0, 0.28,0.5,1) ,cp4[c(round(nlevels/3), nlevels/1.5, nlevels)])} 
+{.filled.contour(x=InterpList[[1]],y=InterpList[[2]], z=InterpList[[3]], levels = c(0, 0.19,0.5,1) ,cp4[c(round(nlevels/3), nlevels/1.5, nlevels)])} 
 contour(x=InterpList[[1]],y=InterpList[[2]], z=InterpList[[3]], labcex=0.6, xlab="", ylab="", nlevels=5, add=TRUE)
 if(output.label=="PNI"|output.label=="pNOB")
-{contour(x=InterpList[[1]],y=InterpList[[2]], z=InterpList[[3]], labcex=0.6, xlab="", ylab="", level=c(0.72, 0.5), add=TRUE, lty=c("dashed", "dotted"), lwd=c(2,2))}
+{contour(x=InterpList[[1]],y=InterpList[[2]], z=InterpList[[3]], labcex=0.6, xlab="", ylab="", level=c(0.8, 0.5), add=TRUE, lty=c("dashed", "dotted"), lwd=c(2,2))}
 if(output.label=="pHOSeff")#(output.label=="pHOSeff") 
-{contour(x=InterpList[[1]],y=InterpList[[2]], z=InterpList[[3]], labcex=0.6, xlab="", ylab="", level=c(0.28, 0.5), add=TRUE, lty=c("dashed", "dotted"), lwd=c(2,2))}
+{contour(x=InterpList[[1]],y=InterpList[[2]], z=InterpList[[3]], labcex=0.6, xlab="", ylab="", level=c(0.19, 0.5), add=TRUE, lty=c("dashed", "dotted"), lwd=c(2,2))}
 usr<-par("usr")
 axis(1); axis(2)
 int<-pretty(sh100.BS,n=3)

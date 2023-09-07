@@ -6,7 +6,7 @@ source("R/FuncDefs.r")
 source("R/SeqFormulationBH.r")
 source("R/run.lever.model.r")
 
-panel.plots.lever<-function(){
+panel.plots.lever<-function(res=res, res.nogenetics=res.nogenetics){
 
 par(mfrow=c(3,2), mar=c(4,4,2,1))
 plot(1:100,res$fit.smolt^2, type="l", ylim=c(0,1), ylab="Fitness", xlab="Generation")
@@ -54,27 +54,27 @@ text(x=2, y=y.upper.lim*0.95, labels="(f)")
 
 c<-40000; percent.hatch<-0; HR<-0.4; h=sqrt(0.25); w<-sqrt(100)
 pdf("TimeseriesLevers18Jan2016.pdf")
-res<-run.lever.model(per.mark=1.0,hatchery.size=0.3, sel=0, Theta.hatch=80, c=c, percent.hatch=percent.hatch, HR=HR, h=h, w=w, mar.surv=0.02, RS=0.8, mar.surv.hatch=0.0024)
-res.nogenetics<-run.lever.model(per.mark=1.0,hatchery.size=0.3, sel=0, Theta.hatch=100, c=c, percent.hatch=percent.hatch, HR=HR, h=h, w=w, mar.surv=0.02, RS=0.8, mar.surv.hatch=0.0024)
-panel.plots.lever()
+res<-run.lever.model(per.mark=1.0,hatchery.size=0.3, sel=0, Theta.hatch=80, c=c, sex.ratio=0.5, percent.hatch=percent.hatch, HR=HR, h=h, w=w, mar.surv=0.02, RS=0.8, mar.surv.hatch=0.0024)
+res.nogenetics<-run.lever.model(per.mark=1.0,hatchery.size=0.3, sel=0, Theta.hatch=100, c=c, sex.ratio=0.5, percent.hatch=percent.hatch, HR=HR, h=h, w=w, mar.surv=0.02, RS=0.8, mar.surv.hatch=0.0024)
+panel.plots.lever(res, res.nogenetics)
 
-res<-run.lever.model(per.mark=1.0,hatchery.size=0.3, sel=0.5, Theta.hatch=80, c=c, percent.hatch=percent.hatch, HR=HR, h=h, w=w, mar.surv=0.02, RS=0.8, mar.surv.hatch=0.0024)
-res.nogenetics<-run.lever.model(per.mark=1.0,hatchery.size=0.3, sel=0.5, Theta.hatch=100, c=c, percent.hatch=percent.hatch, HR=HR, h=h, w=w, mar.surv=0.02, RS=0.8, mar.surv.hatch=0.0024)
-panel.plots.lever()
+res<-run.lever.model(per.mark=1.0,hatchery.size=0.3, sel=0.5, Theta.hatch=80, c=c, sex.ratio=0.5, percent.hatch=percent.hatch, HR=HR, h=h, w=w, mar.surv=0.02, RS=0.8, mar.surv.hatch=0.0024)
+res.nogenetics<-run.lever.model(per.mark=1.0,hatchery.size=0.3, sel=0.5, Theta.hatch=100, c=c, sex.ratio=0.5, percent.hatch=percent.hatch, HR=HR, h=h, w=w, mar.surv=0.02, RS=0.8, mar.surv.hatch=0.0024)
+panel.plots.lever(res, res.nogenetics)
 
-res<-run.lever.model(per.mark=0.5,hatchery.size=0.3, sel=0.5, Theta.hatch=80, c=c, percent.hatch=percent.hatch, HR=HR, h=h, w=w, mar.surv=0.02, RS=0.8, mar.surv.hatch=0.0024)
-res.nogenetics<-run.lever.model(per.mark=0.5,hatchery.size=0.3, sel=0.5, Theta.hatch=100, c=c, percent.hatch=percent.hatch, HR=HR, h=h, w=w, mar.surv=0.02, RS=0.8, mar.surv.hatch=0.0024)
-panel.plots.lever()
+res<-run.lever.model(per.mark=0.5,hatchery.size=0.3, sel=0.5, Theta.hatch=80, c=c, sex.ratio=0.5, percent.hatch=percent.hatch, HR=HR, h=h, w=w, mar.surv=0.02, RS=0.8, mar.surv.hatch=0.0024)
+res.nogenetics<-run.lever.model(per.mark=0.5,hatchery.size=0.3, sel=0.5, Theta.hatch=100, c=c, sex.ratio=0.5, percent.hatch=percent.hatch, HR=HR, h=h, w=w, mar.surv=0.02, RS=0.8, mar.surv.hatch=0.0024)
+panel.plots.lever(res, res.nogenetics)
 dev.off()
 
-res<-run.lever.model(per.mark=0.5,hatchery.size=0.3, sel=0, Theta.hatch=80, c=c, percent.hatch=percent.hatch, HR=HR, h=h, w=w, mar.surv=0.02, RS=0.8, mar.surv.hatch=0.0024)
-res.nogenetics<-run.lever.model(per.mark=1,hatchery.size=0.03, sel=1, Theta.hatch=100, c=c, percent.hatch=percent.hatch, HR=HR, h=h, w=w, mar.surv=0.02, RS=0.8, mar.surv.hatch=0.0024)
-panel.plots.lever()
+res<-run.lever.model(per.mark=0.5,hatchery.size=0.3, sel=0, Theta.hatch=80, c=c, sex.ratio=0.5, percent.hatch=percent.hatch, HR=HR, h=h, w=w, mar.surv=0.02, RS=0.8, mar.surv.hatch=0.0024)
+res.nogenetics<-run.lever.model(per.mark=1,hatchery.size=0.03, sel=1, Theta.hatch=100, c=c, sex.ratio=0.5, percent.hatch=percent.hatch, HR=HR, h=h, w=w, mar.surv=0.02, RS=0.8, mar.surv.hatch=0.0024)
+panel.plots.lever(res, res.nogenetics)
 #per.mark=1;hatchery.size=0.1; sel=1; Theta.hatch=80; c=c; percent.hatch=percent.hatch; HR=HR; h=h; w=w
 
 PNIm<-NA; pHOSm<-NA; pNOBm<-NA; RperSm<-NA; Ret.natm<-NA; PNIs<-NA; pHOSs<-NA; pNOBs<-NA; RperSs<-NA; Ret.nats<-NA; PNIh<-NA; pHOSh<-NA; pNOBh<-NA; BSh<-NA; RperSh<-NA; Ret.nath<-NA;  
 for(i in 1:100){
-  m<-run.lever.model(per.mark=i*0.01, hatchery.size=0.3, sel=0, Theta.hatch=80, c=c, percent.hatch=percent.hatch, HR=HR, h=h, w=w, mar.surv=0.02, RS=0.8, mar.surv.hatch=0.0024)
+  m<-run.lever.model(per.mark=i*0.01, hatchery.size=0.3, sel=0, Theta.hatch=80, c=c, sex.ratio=0.5, percent.hatch=percent.hatch, HR=HR, h=h, w=w, mar.surv=0.02, RS=0.8, mar.surv.hatch=0.0024)
   m.BS<-m$BS
   m.hatchery.size<-m$hatchery.size
   m.sel<-m$sel

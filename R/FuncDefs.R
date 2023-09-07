@@ -77,8 +77,33 @@ solver.BS <- function(pNOB, pHOS, fec, release.surv, mar.surv.hatch, ret.nat, pe
 }
 
 
-
-
+#https://stackoverflow.com/questions/11736996/adding-stippling-to-image-contour-plot
+matrix.poly <- function(x, y, z=mat, n=NULL){
+  if(missing(z)) stop("Must define matrix 'z'")
+  if(missing(n)) stop("Must define at least 1 grid location 'n'")
+  # if(missing(x)) x <- seq(0,1,,dim(z)[1])
+  # if(missing(y)) y <- seq(0,1,,dim(z)[2])
+  poly <- vector(mode="list", length(n))
+  for(i in seq(length(n))){
+    ROW <- ((n[i]-1) %% dim(z)[1]) +1
+    COL <- ((n[i]-1) %/% dim(z)[1]) +1
+    
+    dist.left <- (x[ROW]-x[ROW-1])/2
+    dist.right <- (x[ROW+1]-x[ROW])/2
+    if(ROW==1) dist.left <- dist.right
+    if(ROW==dim(z)[1]) dist.right <- dist.left
+    
+    dist.down <- (y[COL]-y[COL-1])/2
+    dist.up <- (y[COL+1]-y[COL])/2
+    if(COL==1) dist.down <- dist.up
+    if(COL==dim(z)[2]) dist.up <- dist.down
+    
+    xs <- c(x[ROW]-dist.left, x[ROW]-dist.left, x[ROW]+dist.right, x[ROW]+dist.right)
+    ys <- c(y[COL]-dist.down, y[COL]+dist.up, y[COL]+dist.up, y[COL]-dist.down)
+    poly[[i]] <- data.frame(x=xs, y=ys)
+  }
+  return(poly)
+}
 
 #Trials for solver.BS functions, compare to xls "Recruits Accounting for BH model 16Nov2016.xlsx"
 #pNOB<-0.67

@@ -4,12 +4,15 @@
 # (a) target hartchery size, (b) percent marking, and (c) percent selective 
 # removal of marked fish
 # Date last revised 26 Feb 2023
+
+# RETIRED CODE, DO NOT USE
+
 #***************************************************************************
 
 
 # Source population dynamics models
 source(here::here("R", "run.lever.model.r"))
-
+source(here::here("R", "FuncDefs.R"))
 
 # Run population dynamics model over various removal limits and management 
 # levers
