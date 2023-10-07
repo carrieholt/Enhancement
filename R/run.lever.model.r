@@ -36,6 +36,7 @@ run.lever.model<-function( per.mark, #% of hatchery origin fish that are marked
                            release.surv = 0.88 #combined survival of hatchery fish from egg-fry and 
                            ){
 
+n_gen <- 11
 # # Levers
 # per.mark <- 0 #Percentage of hatchery origin fish that are marked
 # hatchery.size <- 0.5 #Hatchery size as a ppn of equilibrium capacity (Seq) of
@@ -246,12 +247,12 @@ ret.hatch.preharvest[1] <- Sm.hatch[1] * mar.surv.hatch
 ret.hatch[1] <- Sm.hatch[1] * mar.surv.hatch * (1 - HR)
 #Returns to hatchery BEFORE harvest
 ret.nat.preharvest[1] <- Sm.nat[1] * mar.surv * fit.adult[1]
-RperS[1] <- ret.nat.preharvest[1] / (HOS[1] + NOS[1])
 # Catch includes harvest + fish selectively removed from river after harvest
 catch[1] <- (ret.hatch.preharvest[1] + ret.nat.preharvest[1]) * HR + 
   ret.hatch[1] * (1 - percent.hatch) * (per.mark) * sel
+RperS[1] <- (ret.nat.preharvest[1] + catch[1]) / (HOS[1] + NOS[1])
 
-for (i in 2:100){#for i generations)
+for (i in 2:n_gen){#for i generations)
   # If population NOT extirpated (natural population extirpated because fitness 
   # impacts and 100% hatchery fish removed prior to spawning)
   if (ext == 0) {
@@ -442,8 +443,8 @@ for (i in 2:100){#for i generations)
   ret.hatch[i]<-Sm.hatch[i]*mar.surv.hatch*(1-HR)
   ret.hatch.preharvest[i]<-Sm.hatch[i]*mar.surv.hatch
   ret.nat.preharvest[i]<-Sm.nat[i]*mar.surv*fit.adult[i]
-  RperS[i]<-ret.nat.preharvest[i]/(HOS[i]+NOS[i])
   catch[i]<-(ret.hatch.preharvest[i]+ret.nat.preharvest[i])*HR + ret.hatch[i]*(1-percent.hatch)*(per.mark)*sel#Includes harvest + fish selectively removed from river after harvest
+  RperS[i]<-(ret.nat.preharvest[i] + catch[i])/(HOS[i]+NOS[i])
   }#End of if(ext==0) If population not extirpated
 
 if(ext==1){
