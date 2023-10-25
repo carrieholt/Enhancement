@@ -90,6 +90,7 @@ ret.hatch <- NA #Returns to the hatchery AFTER harvest
 ret.hatch.preharvest <- NA #Returns to the hatchery PRIOR TO harvest
 BS <- NA #Brood stock collected after considering limit on ppn.RR
 BS.mark <- NA # Is BS limit exceeded?
+BS.limit <- 0
 handling.limit.mark <- NA # Are returns < handling size limit?
 handling.limit.year <- NA # Years in which handling limts are exceeded
 ppn.unmarked.spawners <- NA
@@ -155,6 +156,10 @@ if (BS.set <= (0.33 * (HOR[1] + Seq - HOR.rem[1]) ) ){
 # overwrite the BS[1] above
 if(BS.ppnRR) {
   BS[1] <- ppn.RR * (HOR[1] + Seq - HOR.rem[1])
+  # if(BS[1] > BS.set) {
+  #   BS[1] <- BS.set
+  #   BS.limit <- 1
+  # }
 }
 
 # What is the ppn of spawners that are unmarked?
@@ -236,8 +241,7 @@ Sp.nat[1] <- NOS[1] + HOS[1]
 
 fit.smolt[1] <- fit.lifestage( P.nat[1], Theta.nat, w, sig, rel.loss)
 Sm.nat[1] <- BH(HOS[1], NOS[1], RS, p, c) * fit.smolt[1]
-Sm.hatch[1] <- Hatch.sm( BS[1] * bs.surv, fec, sex.ratio, release.surv) * 
-  fit.smolt[1]
+Sm.hatch[1] <- Hatch.sm( BS[1] * bs.surv, fec, sex.ratio, release.surv) #*  fit.smolt[1]
 
 fit.adult[1] <- fit.lifestage( P.nat[1], Theta.nat, w, sig, 1 - rel.loss)
 # Returns to spawning grounds AFTER harvest
@@ -280,6 +284,11 @@ for (i in 2:n_gen){#for i generations)
       # (BS.set) overwrite the BS[i] above
       if(BS.ppnRR) {
         BS[i] <- ppn.RR * (ret.nat[i-1] + HOR[i] - HOR.rem[i])
+        # if(BS[i] > BS.set) {
+        #   BS[i] <- BS.set
+        #   BS.limit[i] <- 1
+        # }
+        
       }
       
       # Check if BS (and handing limit?) are actually available on the spawning 
@@ -437,7 +446,7 @@ for (i in 2:n_gen){#for i generations)
   P.hatch[i]<-Phatch(pNOB[i-1], P.hatch[i-1], w, sig, Theta.hatch, h, P.nat[i-1])
   fit.smolt[i]<-fit.lifestage(P.nat[i], Theta.nat, w, sig, rel.loss)
   Sm.nat[i]<-BH(HOS[i], NOS[i], RS, p, c)*fit.smolt[i]
-  Sm.hatch[i]<-Hatch.sm(BS[i]*bs.surv, fec, sex.ratio, release.surv)*fit.smolt[i]
+  Sm.hatch[i]<-Hatch.sm(BS[i]*bs.surv, fec, sex.ratio, release.surv)#*fit.smolt[i]
   
   fit.adult[i]<-fit.lifestage(P.nat[i], Theta.nat, w, sig, 1-rel.loss)
   ret.nat[i]<-Sm.nat[i]*mar.surv*fit.adult[i]*(1-HR)
@@ -473,7 +482,8 @@ if(ext==1){
                 RperS = RperS, sel = sel, mar.surv = mar.surv, c = c, 
                 pHOSeff = pHOSEff, fit.adult = fit.adult, BS.mark = BS.mark,
                 handling.limit.mark = handling.limit.mark, 
-                handling.limit.year = handling.limit.year) )
+                handling.limit.year = handling.limit.year,
+                Sm.nat = Sm.nat, BS.limit = BS.limit) )
 
 }#End of run.lever.model
 

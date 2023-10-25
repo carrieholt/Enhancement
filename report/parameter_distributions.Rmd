@@ -1,0 +1,290 @@
+---
+title: "Parameter Distributions for PNI model"
+author: "Carrie Holt"
+date: "2023-10-20"
+output: 
+  html_document:
+    toc: true
+    toc_float:
+      toc_collapsed: true
+    toc_depth: 3
+    number_sections: false
+    theme: lumen
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(ggplot2)
+library(scales)
+```
+
+## Parameters for natural-origin spawners 
+
+### Beverton-Holt productivity parameter (smolts/spawner)
+
+**Distribution:** Log-normal
+
+**Mean:** 175 smolts/spawner
+
+**SD:** 75
+
+**Bounds:** >=50 and <=350
+
+The log-normal distribution matches the assumed distribution of residual variation in the Beverton-Holt model, with a relatively large assumed variance to cover a range in possible productivity values. The mean value is derived from Withler et al. (2018) for Big Qualicum Chinook, with variance and bounds to cover higher values estimated for Cowichan fall run (250) by Tompkins et al. (2005) and lower values for Snake River spring/summer run (138) by Walters et al. (2014). 
+
+Advice on better ways to estimate this distribution would be appreciated. I have a list of possible sources of smolt time series (from PSC, US colleagues), but insufficient time to dig these up and estimate Beverton-Holt parameters for the spawner-smolt relationship. Smolt time-series are not compiled in a centralized location.
+
+```{r Productivity, echo = FALSE, warning = FALSE, fig.dim = c(4,3), fig.cap= "Fig. 1. Assumed distribution of productivity values. Grey dashed lines is the mean derived from Withler et al. (2018),  grey dotted lines are estimates from Tompkins et al (2005) and Walters et al. (2014), and grey solid lines represent the assumed bounds."}
+x <- data.frame(values=rlnorm(1000,meanlog=log(175), sdlog=0.4))
+#sd(x$values)
+x <- x |> dplyr::filter(values >= 50 & values <= 350)
+p <- x |> ggplot(aes(x=values)) + 
+  geom_density(fill=hue_pal()(1),  alpha=0.3, size=1, bw=30) + 
+  xlab("Productivity (smolts/spawner)") +
+  geom_vline(xintercept = c(50, 350), color= grey(0.6)) + 
+  theme(axis.ticks.y = element_blank(), axis.text.y= element_blank()) + 
+  geom_vline(xintercept = c(175), color= grey(0.6), linetype="dashed", linewidth=1) +
+  geom_vline(xintercept = c(138,250), color= grey(0.6), linetype="dotted", linewidth=0.8) +
+  ggtitle("Productivity (smolt/spawner)")
+p
+# add text describing 3 grey lines using geom_text()
+```
+
+### Beverton-Holt capacity parameter (number smolts at capacity)
+
+
+A single fixed value of 400,000 is assumed as the model scales to this parameter, as applied in Withler et al. (2018). Varying this parameter does not impact results.
+
+
+### Natural-origin smolt-to-adult survival
+
+**Distribution:** Normal
+
+**Mean:** 0.02
+
+**SD:** 0.01
+
+**Bounds:** >=0.001 <=0.06
+
+The mean value was derived from Withler et al (2018) as it generated stable dynamics given Beverton Holt parameters and harvest, as parameterized for Big Qualicum Chinook. This value is consistent with the marine survival assumed for WCVI Chinook in Luedke et al.'s life-history model (Luedke pers. comm.). Chasco et al. (2021) found evidence for marine survival rates ranging from ~1%-6% for wild Snake River spring/summer Chinook, with most years between 1% and 3%. The bounds used here are derived the limits of estimates from Chasco et al. (2021).
+
+```{r natural-origin smolt-to-adult survival, echo=FALSE, fig.dim = c(4,3), warning = FALSE, fig.dim = c(4,3), fig.cap= "Fig. 2. Assumed distribution of natural-origin smolt-to-adult survival. Grey dashed lines is the mean derived from Withler et al. (2018) and Luedke (pers. comm.), and grey solid lines represent the assumed bounds."}
+x <- data.frame(values=rnorm(1000,mean=0.02, sd=0.01))
+x <- x |> dplyr::filter(values >= 0.001 & values <=0.06)
+p <- x |> ggplot(aes(x=values)) + 
+  geom_density(fill=hue_pal()(1),  alpha=0.3, size=1, bw=0.005) + 
+  xlab("Natural-origin smolt-to-adult survival") +
+  geom_vline(xintercept = c(0.001, 0.06), color= grey(0.6)) + 
+  theme(axis.ticks.y = element_blank(), axis.text.y= element_blank()) + 
+  geom_vline(xintercept = c(0.02), color= grey(0.6), linetype="dashed", linewidth=1) +
+  ggtitle("Natural-origin smolt-to-adult survival")
+p
+```
+
+
+## Parameters for hatchery-origin spawners 
+
+### Survival from brood collection to spawning
+
+**Distribution:** Beta
+
+**Mean:** 0.91
+
+**SD:** 0.11
+
+**Bounds:** 0 and 1 (by definition)
+
+The parameters were derived from survival data  estimates from 16 hatchery populations of Chinook salmon from ECVI, WCVI, Interior & Fraser, and central coast (Angus Straight, pers. comm.). 
+*Question for Angus, over which years were the population-specific survival rates estimated?
+
+
+```{r Survival from brood collection to spawning, echo=FALSE, warning = FALSE, fig.dim = c(4,3), fig.cap = "Fig. 3. Assumed distribution of survival rate from brood collection to spawning. Grey dashed lines is the mean, grey dotted lines are values for 16 hatchery populations of Chinook in BC (A. Straight pers. comm.), and grey solid lines represent the bounds."}
+
+mean <- 0.91
+sig <- 0.11
+data_survBrood <- c(0.82, 0.58, 0.81, 0.82, 0.94, 0.93, 0.97, 0.88, 0.76, 0.90, 1.00, 1.00, 0.95, 1.00, 0.98, 0.99)
+
+shape1 <- mean^2 * (((1-mean) / sig^2)-(1/mean))
+shape2 <- shape1 * (1 / mean - 1)
+
+x <- data.frame( values = rbeta(1000, shape1, shape2 ))
+
+p <- x |> ggplot(aes(x=values)) + 
+  geom_density(fill=hue_pal()(1),  alpha=0.3, size=1, bw=0.1) + 
+  xlab("Survival from brood collection to spawning") +
+  geom_vline(xintercept = c(0, 1), color= grey(0.6)) + 
+  theme(axis.ticks.y = element_blank(), axis.text.y= element_blank()) + 
+  geom_vline(xintercept = c(0.91), color= grey(0.5), linetype="dashed", linewidth=1) +
+  geom_vline(xintercept = data_survBrood, color= grey(0.6), linetype="dotted", linewidth=0.8) +
+  ggtitle("Survival from brood collection to spawning")
+p
+```
+
+
+### Fecundity
+
+**Distribution:** Log-normal
+
+**Mean:** 4600
+
+**SD:** 830 (0.18 in log-space)
+
+**Bounds:** >0 (by definition)
+
+The parameters were derived from fecundity estimates from 17 populations of Chinook salmon from ECVI, WCVI, Interior & Fraser, and central coast (Angus Straight, pers. comm.). The log-normal distribution accounts for the slightly longer positive tail, allowing for higher fecundities than a normal distribution.
+
+*Question for Angus, over which years were the population-specific fecundities estimated?
+
+
+```{r Fecundity, echo=FALSE, warning = FALSE, fig.dim = c(4,3), fig.cap = "Fig. 4. Assumed distribution of fecundities. Grey dashed lines is the mean, grey dotted lines are values for 17 hatchery populations of Chinook in BC (A. Straight pers. comm.), and grey solid line represents the lower bound."}
+x <- data.frame(values=rlnorm(1000,meanlog=log(4600), sdlog=0.18))
+#sd(x$values)
+data_fec <- c(5097, 3602, 4881, 4372, 5695, 4231, 3750, 3907, 3729, 3911, 4187, 6318, 6000, 3817, 4988, 4680, 5020)
+
+
+p <- x |> ggplot(aes(x=values)) + 
+  geom_density(fill=hue_pal()(1),  alpha=0.3, size=1, bw=300) + 
+  xlab("Fecundity") +
+  geom_vline(xintercept = c(0), color= grey(0.6)) + 
+  theme(axis.ticks.y = element_blank(), axis.text.y= element_blank()) + 
+  geom_vline(xintercept = 4600, color= grey(0.5), linetype="dashed", linewidth=1) +
+  geom_vline(xintercept = data_fec, color= grey(0.6), linetype="dotted", linewidth=0.8) +
+  
+  ggtitle("Fecundity")
+p
+```
+### Proportion of females in brood stock
+
+This parameter is assumed to be fixed at 0.5, as in the Erratum to Withler et al. (2018).
+
+
+
+### Survival from egg to smolt in the hatchery
+
+**Distribution:** Beta
+
+**Mean:** 0.83
+
+**SD:** 0.16
+
+**Bounds:** 0 and 1 (by definition)
+
+Egg-to-smolt survival rate distribuion was derived from estimates from 17 hatchery populations of Chinook salmon from ECVI, WCVI, Interior & Fraser, and central coast (Angus Straight, pers. comm.). 
+
+*Question for Angus, over which years were the population-specific survival rates estimated?
+
+
+```{r Survival from egg to smolt in the hatchery, echo=FALSE,  warning = FALSE, fig.dim = c(4,3), fig.cap = "Fig. 5. Assumed distribution of survival from egg to smolt in the hatchery. Grey dashed lines is the mean, grey dotted lines are values for 17 hatchery populations of Chinook in BC (A. Straight pers. comm.), and grey solid lines represent the bounds."}
+
+mean <- 0.83
+sig <- 0.16
+data_survSmolt <- c(0.86, 0.86, 0.89, 0.83, 0.91, 0.73, 0.88, 0.91, 0.23, 0.67, 0.87, 0.90, 0.85, 0.87, 0.88, 0.90, 0.91, 0.92)
+# ? one outlier, 0.23 (chiliwack River)
+
+shape1 <- mean^2 * (((1-mean) / sig^2)-(1/mean))
+shape2 <- shape1 * (1 / mean - 1)
+
+x <- data.frame( values = rbeta(1000, shape1, shape2 ))
+
+p <- x |> ggplot(aes(x=values)) + 
+  geom_density(fill=hue_pal()(1),  alpha=0.3, size=1, bw=0.1) + 
+  xlab("Survival from egg to smolt in the hatchery") +
+  geom_vline(xintercept = c(0, 1), color= grey(0.6)) + 
+  theme(axis.ticks.y = element_blank(), axis.text.y= element_blank()) + 
+  geom_vline(xintercept = mean, color= grey(0.5), linetype="dashed", linewidth=1) +
+  geom_vline(xintercept = data_survSmolt, color= grey(0.6), linetype="dotted", linewidth=0.8) +
+  ggtitle("Survival from egg to smolt in the hatchery")
+p
+```
+
+
+
+### Marine survival of hatchery smolts 
+
+**Distribution:** Normal
+
+**Mean:** 0.005
+
+**SD:** 0.0005
+
+**Bounds:** >=0 
+
+The parameters of the distribution were derived from survival rate estimates from 18 populations from ECVI, WCVI, Interior & Fraser, and central coast, including separate estimates for lower and upper Atnarko Chinook (Angus Straight, pers. comm.). 
+
+*Question for Angus, over which years were the population-specific survival rates estimated?
+
+
+```{r Marine survival of hatchery smolts , echo=FALSE,  warning = FALSE, fig.dim = c(4,3), fig.cap = "Fig. 6. Assumed distribution of marine survival of hatchery smolts. Grey dashed lines is the mean, grey dotted lines are values for 17 hatchery populations of Chinook in BC (A. Straight pers. comm.), and grey solid line represents the lower bound. Note, the grey dotted lines are often overlapping; only 6 are visible."}
+
+mean <- 0.005
+sig <- 0.0005
+data_survMar <- c(0.002, 0.002, 0.004, 0.002, 0.002, 0.004, 0.004, 0.005, 0.002, 0.025, 0.008, 0.002, 0.004, 0.007, 0.006, 0.005, 0.007, 0.005)
+# ?outlier at 0.025 (Chiliwack River Fall)
+
+x <- data.frame(values=rnorm(1000,mean=mean, sd=sig))
+p <- x |> ggplot(aes(x=values)) + 
+  geom_density(fill=hue_pal()(1),  alpha=0.3, size=1, bw=0.005) + 
+  xlab("Marine survival of hatchery smolts") +
+  geom_vline(xintercept = c(0), color= grey(0.6)) + 
+  theme(axis.ticks.y = element_blank(), axis.text.y= element_blank()) + 
+  geom_vline(xintercept = mean, color= grey(0.6), linetype="dashed", linewidth=1) +
+  geom_vline(xintercept = data_survMar, color= grey(0.6), linetype="dotted", linewidth=0.8) +
+   ggtitle("Marine survival of hatchery smolts")
+p
+
+```
+
+
+
+### Relative reproductive success
+
+The $\gamma parameter of the model representing the relative reproductive success of hatchery origin fish relative to natural-origin is assumed to be fixed at 0.8, as in HSRG 2009 and 2014, and Withler et al. (2018).
+
+
+## Fitness parameters
+
+### Heritability
+
+**Distribution:** Normal
+
+**Mean:** 0.25
+
+**SD:** 0.15
+
+**Bounds:** >0 and <0.5
+
+Meta-analyses from Mousseau et al. and Hoffman et al (2015) identified ranges of heritability, $h^{2}$, from near zero to 0.5. Withler et al. (2018) assumed a heritability of 0.25 in the mid-point of this range, and considered lower value of 0.05 in sensitivity analyses. 
+
+<!-- The heritability of fitness (h2) was assumed to be 0.5 by HSRG; however, various meta-analyses of heritability of life history traits linked to fitness yield much lower values (Mousseau and Roff 1987; Reed et al. 2015, Hoffman et al. 2016). For the baseline runs we used a value of 0.25, and then used h2 = 0.05 in a sensitivity analysis to bracket the likely range. -->
+
+```{r Heritability, echo=FALSE,  warning = FALSE, fig.dim = c(4,3), fig.cap = "Fig. 7. Assumed distribution of heritability. Grey dashed lines represents the assumed mean, and grey solid line represents the assumed bounds."}
+x <- data.frame(values=rnorm(1000,mean=0.25, sd=0.15))
+x <- x |> dplyr::filter(values > 0.00 & values <0.5)
+p <- x |> ggplot(aes(x=values)) + 
+  geom_density(fill=hue_pal()(1),  alpha=0.3, size=1, bw=0.1) + 
+  xlab("Heritability") +
+  geom_vline(xintercept = c(0,0.5), color= grey(0.6)) + 
+  theme(axis.ticks.y = element_blank(), axis.text.y= element_blank()) + 
+  geom_vline(xintercept = c(0.25), color= grey(0.6), linetype="dashed", linewidth=1) +
+  ggtitle("Heritability")
+p
+```
+
+### Variance of the fitness distribution 
+
+Th variance of the fitness distribution, $\omega^{2}$ is set constant at 100, as applied in Withler et al. (2018), assuming strong selection (HSRG 2009).
+
+
+### Variance in phenotypic traits
+
+The variance in phenotypic traits, $\sigma^{2}$ is set constant at 10, as applied in Withler et al. (2018), and HSRG (2009) and (2014).
+
+### Optimum hatchery- and natural-origin trait value
+
+The optimum hatchery- and natural-origin trait values are set at 80 and 100, as applied in Withler et al. (2018) and HSRG (2009) and (2014). A sensitivity analysis of optimum values of 50 and 100 (hatchery- and natural-origin, respectively) is considered to provide a upper bounds on the difference in optimum traits between the two environments.
+
+
+
+
+
+
