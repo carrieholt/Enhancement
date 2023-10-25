@@ -426,7 +426,7 @@ for (i in 2:n_gen){#for i generations)
     }
   }#End of if(ret.nat[i-1]>0)
   
-  if(ret.nat[i-1]<=0){
+  if(ret.nat[i-1]<=2){
     ppn.unmarked.spawners[i]<-0; 
     NOS[i]<-0; 
     HOS[i]<-HOR[i]-HOR.rem[i]; 
@@ -458,7 +458,7 @@ for (i in 2:n_gen){#for i generations)
   }#End of if(ext==0) If population not extirpated
 
 if(ext==1){
-  NOS[i]<-0; HOS[i]<-HOR[i]-HOR.rem[i]; pNOB[i]<-0; HOB[i]<-0; pHOS[i]<-1; pHOSEff[i]<-1; PNI[i]<-0; 
+  NOS[i]<-0; HOS[i]<-HOR[i]-HOR.rem[i]; pNOB[i]<-0; NOB[i] <- 0; HOB[i]<-0; pHOS[i]<-1; pHOSEff[i]<-1; PNI[i]<-0; 
   Sm.hatch[i]<-0;#Hatch.sm(BS.set*bs.surv, fec, release.surv)
   ret.hatch[i]<-0#Sm.hatch[i]*mar.surv.hatch*(1-HR)
   ret.hatch.preharvest[i]<-0#Sm.hatch[i]*mar.surv.hatch

@@ -99,11 +99,15 @@ time_series_plots<-function(res=res, res.nogenetics=res.nogenetics, ngen=100,  B
   legend(x=5,y=y.upper.lim*0.83, legend=c("Natural spawners", "NOS", "HOS", "Brood stock removals", "NOB (accounting for mortality prior to spawning)", "HOB"), col=c(rep("red",3),rep("blue",3)), cex=0.7, lty=rep(c("solid", "dashed","dotted"),2), bty="n")
   text(x=1, y=y.upper.lim*0.95, labels="(b)")
   
-  y.max <- max(c(res$NOS, res$NOB), na.rm=T)
-  plot(time_frame, res$NOS[1:ngen], type="l", col="red",lty="dashed", ylim=c(0,y.max), ylab="HOS, NOS(scaled from (b))", xlab="Generation")
-  points(x=time_frame, y=res$NOB[1:ngen], col="blue", type="l",lty="dashed")
-  legend(x=5,y=y.max*0.83, legend=c("NOS","NOB (accounting for mortality prior to spawning)"), col=c(rep("red",1),rep("blue",1)), cex=0.7, lty=rep(c("dashed"),2), bty="n")
-  text(x=1, y=y.max*0.95, labels="(c)")
+  # y.max <- max(c(res$NOS, res$NOB), na.rm=T)
+  # plot(time_frame, res$NOS[1:ngen], type="l", col="red",lty="dashed", ylim=c(0,y.max), ylab="HOS, NOS(scaled from (b))", xlab="Generation")
+  # points(x=time_frame, y=res$NOB[1:ngen], col="blue", type="l",lty="dashed")
+  # legend(x=5,y=y.max*0.83, legend=c("NOS","NOB (accounting for mortality prior to spawning)"), col=c(rep("red",1),rep("blue",1)), cex=0.7, lty=rep(c("dashed"),2), bty="n")
+  # text(x=1, y=y.max*0.95, labels="(c)")
+  # 
+  plot(time_frame,res$HOS+res$HOB, type="l", col="red", ylab="Returns", xlab="Generation", ylim = c(0,max(c(res$HOS+res$HOB, res$NOS+res$NOB), na.rm=T) ) )
+  points(x=1:ngen, y=(res$NOB + res$NOS), col="blue",type="l")
+  legend(x=ngen/2,y=max(res$HOS+res$HOB)*0.85, legend=c("Hatchery returns", "Natural returns"), col=c(rep("red",1),rep("blue",1)), cex=0.7, lty=rep(c("solid"),2), bty="n")
   
   plot(time_frame, res$pHOSeff[1:ngen], type="l", col="red", ylim=c(0,1), ylab="Proportion (pHOSeff or pNOB)", xlab="Generation")
   lines(time_frame, res$pNOB[1:ngen], col="blue")
@@ -140,7 +144,7 @@ return_time_series_plots<-function(res=res, ngen=100,  BS.ppnRR = FALSE, ppn.RR 
   if(ngen != 11) {time_frame <- 1:ngen}
   par(mfrow=c(1,1))#, mar=c(4,4,2,1))
   
-  plot(time_frame,res$HOS+res$HOB, type="l", col="red", ylab="Returns", xlab="Generation")
+  plot(time_frame,res$HOS+res$HOB, type="l", col="red", ylab="Returns", xlab="Generation", ylim = c(0,max(res$HOS+res$HOB, res$NOS+res$NOB)))
   points(x=1:ngen, y=(res$NOB + res$NOS), col="blue",type="l")
   legend(x=ngen/2,y=max(res$HOS+res$HOB)*0.85, legend=c("Hatchery returns", "Natural returns"), col=c(rep("red",1),rep("blue",1)), cex=0.7, lty=rep(c("solid"),2), bty="n")
   #points(x=1:100,y=res$P.hatch/100, col="blue", type="l")
@@ -263,9 +267,9 @@ dev.off()
 
 
 # PLots of time-series for various ppns of returns to river showing dyanmics prior to equilibrium
-pdf(here::here("Results/Timeseries-ppnRR-thetaHatch80.pdf"))
+pdf(here::here("Results/Timeseries-ppnRR-thetaHatch50.pdf"))
 ppn.RR <-  0.1
-Theta.hatch <- 80
+Theta.hatch <- 50
 hatchery.size <- 0.1
 res <- run.lever.model(p = 175, per.mark = 0, hatchery.size = hatchery.size, 
                        BS.ppnRR = TRUE, ppn.RR = ppn.RR, sel = 0,
@@ -279,6 +283,7 @@ res.nogenetics <- run.lever.model(p = 175, per.mark = 0, hatchery.size = hatcher
                                   w = sqrt(100), mar.surv = 0.02, RS = 0.8, 
                                   mar.surv.hatch = 0.0024)
 time_series_plots(res, res.nogenetics, BS.ppnRR = TRUE, ppn.RR=ppn.RR)
+# return_time_series_plots(res,  BS.ppnRR = TRUE, ppn.RR=ppn.RR)
 
 ppn.RR <-  0.2
 res <- run.lever.model(p = 175, per.mark = 0, hatchery.size = hatchery.size, 
@@ -293,6 +298,7 @@ res.nogenetics <- run.lever.model(p = 175, per.mark = 0, hatchery.size = hatcher
                                   w = sqrt(100), mar.surv = 0.02, RS = 0.8, 
                                   mar.surv.hatch = 0.0024)
 time_series_plots(res, res.nogenetics, BS.ppnRR = TRUE, ppn.RR=ppn.RR)
+# return_time_series_plots(res,  BS.ppnRR = TRUE, ppn.RR=ppn.RR)
 
 ppn.RR <-  0.3
 res <- run.lever.model(p = 175, per.mark = 0, hatchery.size = hatchery.size, 
@@ -307,6 +313,7 @@ res.nogenetics <- run.lever.model(p = 175, per.mark = 0, hatchery.size = hatcher
                                   w = sqrt(100), mar.surv = 0.02, RS = 0.8, 
                                   mar.surv.hatch = 0.0024)
 time_series_plots(res, res.nogenetics, BS.ppnRR = TRUE, ppn.RR=ppn.RR)
+# return_time_series_plots(res,  BS.ppnRR = TRUE, ppn.RR=ppn.RR)
 
 ppn.RR <-  0.4
 res <- run.lever.model(p = 175, per.mark = 0, hatchery.size = hatchery.size, 
@@ -321,6 +328,7 @@ res.nogenetics <- run.lever.model(p = 175, per.mark = 0, hatchery.size = hatcher
                                   w = sqrt(100), mar.surv = 0.02, RS = 0.8, 
                                   mar.surv.hatch = 0.0024)
 time_series_plots(res, res.nogenetics, BS.ppnRR = TRUE, ppn.RR=ppn.RR)
+# return_time_series_plots(res,  BS.ppnRR = TRUE, ppn.RR=ppn.RR)
 
 ppn.RR <-  0.5
 res <- run.lever.model(p = 175, per.mark = 0, hatchery.size = hatchery.size, 
@@ -335,5 +343,6 @@ res.nogenetics <- run.lever.model(p = 175, per.mark = 0, hatchery.size = hatcher
                                   w = sqrt(100), mar.surv = 0.02, RS = 0.8, 
                                   mar.surv.hatch = 0.0024)
 time_series_plots(res, res.nogenetics, BS.ppnRR = TRUE, ppn.RR=ppn.RR)
+# return_time_series_plots(res,  BS.ppnRR = TRUE, ppn.RR=ppn.RR)
 
 dev.off()
