@@ -85,6 +85,7 @@ time_series_plots<-function(res=res, res.nogenetics=res.nogenetics, ngen=100,  B
   # title<-paste("Mark rate=",res$per.mark*100,"%;  Brood stock=",round(res$BS[1],0), " (",res$hatchery.size*100, "% ave natural recruitment);  Removal of marked fish=",res$sel*100,"%", sep="")
   if (!BS.ppnRR) title<-paste("Theta.hatch=",res$Theta.hatch,";  selection pressure, w^2=", w^2, "; Brood stock=", round(res$BS[1],0), " (",res$hatchery.size*100, "% ave natural recruitment)", sep="")
   if(BS.ppnRR) title<-paste("Theta.hatch=",res$Theta.hatch,";  selection pressure, w^2=", w^2, "; Brood stock= ", ppn.RR, " of returns to river", sep="")
+  title<-paste("Rule on max ppn of returns=",res$BS.ppnRR.cap,"; Brood stock cap=", round(res$BS[100],0), " (",res$hatchery.size*100, "% ave natural recruitment)", sep="")
   mtext(title, side=3, line=0.5, at=ngen, cex=0.75)
   
   y.upper.lim<-max(res$Sp.nat, na.rm=T)#res$Seq*res$mar.surv*40
@@ -118,10 +119,11 @@ time_series_plots<-function(res=res, res.nogenetics=res.nogenetics, ngen=100,  B
   # plot(time_frame, res$PNI[1:ngen], type="l", col="black", ylim=c(0,1), ylab="PNI",  xlab="Generation")
   # text(x=1, y=0.95, labels="(d)")
   
-  # plot(time_frame, res$RperS[1:ngen], ylim=c(min(res$RperS)*0.8, max(res$RperS)*1.2), type="l", col="black",  ylab="Recruits/spawner on spawning grounds", xlab="Generation")
-  # text(x=1, y=max(res$RperS)*1.18, labels="(e)")
-  plot(time_frame, res$Sm.nat[1:ngen],  type="l", col="black",  ylab="Natural smolt production", xlab="Generation")
-  text(x=1, y=max(res$Sm.nat)*1.18, labels="(e)")
+  plot(time_frame, res$RperS[1:ngen], ylim=c(min(res$RperS)*0.8, max(res$RperS.hatch)*1.2), type="l", col="black",  ylab="Recruits/spawner on spawning grounds", xlab="Generation")
+  lines(time_frame, res$RperS.hatch[1:ngen], col="blue")
+  text(x=1, y=max(res$RperS)*1.18, labels="(e)")
+  # plot(time_frame, res$Sm.nat[1:ngen],  type="l", col="black",  ylab="Natural smolt production", xlab="Generation")
+  # text(x=1, y=max(res$Sm.nat)*1.18, labels="(e)")
   
   y.upper.lim<-max(c(res$ret.nat.preharvest, res.nogenetics$ret.nat.preharvest), na.rm=T)#res$c*res$mar.surv
   #if(max(res$ret.nat)>res$Seq*1.2){y.upper.lim<-max(res$ret.nat)*1.1}
@@ -163,7 +165,7 @@ return_time_series_plots<-function(res=res, ngen=100,  BS.ppnRR = FALSE, ppn.RR 
 # pdf(here::here("Results/FitnessPars/Timeseries-w2_40_hatchsize_0.3_sexRatio1.pdf"))
 # ***Need to change ngen to 500 or 11 in run.lever.model.r and in time-series function above
 # pdf(here::here("Results/FitnessPars/Timeseries-w2_100_hatchsize_0.1_500gen.pdf"))
-pdf(here::here("Results/FitnessPars/Timeseries-w2_100_hatchsize_0.1_100gen.pdf"))
+# pdf(here::here("Results/FitnessPars/Timeseries-w2_100_hatchsize_0.1_100gen.pdf"))
 hs <- 0.1
 w <- sqrt(100)#sqrt(40)
 #Theta.hatch = 80
@@ -259,7 +261,8 @@ time_series_plots(res, res.nogenetics)
 #                                   mar.surv.hatch = 0.0024)
 # time_series_plots(res, res.nogenetics)
 
-dev.off()
+# dev.off()
+
 # run for w2=100, theta.hatch=0, 20, 40, 60, 80.
 # run for w2= 40, theta.hatch=0, 20, 40, 60, 80.
 # run for w2= 40, theta.hatch=0, 20, 40, 60, 80, sex.ratio = 1
@@ -267,21 +270,22 @@ dev.off()
 
 
 # PLots of time-series for various ppns of returns to river showing dyanmics prior to equilibrium
-pdf(here::here("Results/Timeseries-ppnRR-thetaHatch50.pdf"))
+# pdf(here::here("Results/Timeseries-ppnRR-withRperS-noGenetics.pdf"))
 ppn.RR <-  0.1
-Theta.hatch <- 50
+Theta.hatch <- 100#80
 hatchery.size <- 0.1
+BS.invRR <- FALSE
 res <- run.lever.model(p = 175, per.mark = 0, hatchery.size = hatchery.size, 
                        BS.ppnRR = TRUE, ppn.RR = ppn.RR, sel = 0,
-                       Theta.hatch = 80, c = c, sex.ratio = 0.5,
+                       Theta.hatch = Theta.hatch, c = c, sex.ratio = 0.5,
                        percent.hatch = percent.hatch, HR = HR, h = h, w = sqrt(100),
-                       mar.surv = 0.02, RS = 0.8, mar.surv.hatch = 0.0024)
+                       mar.surv = 0.02, RS = 0.8, mar.surv.hatch = 0.0024, BS.invRR = BS.invRR)
 res.nogenetics <- run.lever.model(p = 175, per.mark = 0, hatchery.size = hatchery.size, 
                                   BS.ppnRR = TRUE, ppn.RR = ppn.RR, sel = 0, 
                                   Theta.hatch = 100, c = c, sex.ratio = 0.5, 
                                   percent.hatch = percent.hatch, HR = HR, h = h,
                                   w = sqrt(100), mar.surv = 0.02, RS = 0.8, 
-                                  mar.surv.hatch = 0.0024)
+                                  mar.surv.hatch = 0.0024, BS.invRR = BS.invRR)
 time_series_plots(res, res.nogenetics, BS.ppnRR = TRUE, ppn.RR=ppn.RR)
 # return_time_series_plots(res,  BS.ppnRR = TRUE, ppn.RR=ppn.RR)
 
@@ -290,13 +294,13 @@ res <- run.lever.model(p = 175, per.mark = 0, hatchery.size = hatchery.size,
                        BS.ppnRR = TRUE, ppn.RR = ppn.RR, sel = 0,
                        Theta.hatch = Theta.hatch, c = c, sex.ratio = 0.5,
                        percent.hatch = percent.hatch, HR = HR, h = h, w = sqrt(100),
-                       mar.surv = 0.02, RS = 0.8, mar.surv.hatch = 0.0024)
+                       mar.surv = 0.02, RS = 0.8, mar.surv.hatch = 0.0024, BS.invRR = BS.invRR)
 res.nogenetics <- run.lever.model(p = 175, per.mark = 0, hatchery.size = hatchery.size, 
                                   BS.ppnRR = TRUE, ppn.RR = ppn.RR, sel = 0, 
                                   Theta.hatch = 100, c = c, sex.ratio = 0.5, 
                                   percent.hatch = percent.hatch, HR = HR, h = h,
                                   w = sqrt(100), mar.surv = 0.02, RS = 0.8, 
-                                  mar.surv.hatch = 0.0024)
+                                  mar.surv.hatch = 0.0024, BS.invRR = BS.invRR)
 time_series_plots(res, res.nogenetics, BS.ppnRR = TRUE, ppn.RR=ppn.RR)
 # return_time_series_plots(res,  BS.ppnRR = TRUE, ppn.RR=ppn.RR)
 
@@ -305,13 +309,13 @@ res <- run.lever.model(p = 175, per.mark = 0, hatchery.size = hatchery.size,
                        BS.ppnRR = TRUE, ppn.RR = ppn.RR, sel = 0,
                        Theta.hatch = Theta.hatch, c = c, sex.ratio = 0.5,
                        percent.hatch = percent.hatch, HR = HR, h = h, w = sqrt(100),
-                       mar.surv = 0.02, RS = 0.8, mar.surv.hatch = 0.0024)
+                       mar.surv = 0.02, RS = 0.8, mar.surv.hatch = 0.0024, BS.invRR = BS.invRR)
 res.nogenetics <- run.lever.model(p = 175, per.mark = 0, hatchery.size = hatchery.size, 
                                   BS.ppnRR = TRUE, ppn.RR = ppn.RR, sel = 0, 
                                   Theta.hatch = 100, c = c, sex.ratio = 0.5, 
                                   percent.hatch = percent.hatch, HR = HR, h = h,
                                   w = sqrt(100), mar.surv = 0.02, RS = 0.8, 
-                                  mar.surv.hatch = 0.0024)
+                                  mar.surv.hatch = 0.0024, BS.invRR = BS.invRR)
 time_series_plots(res, res.nogenetics, BS.ppnRR = TRUE, ppn.RR=ppn.RR)
 # return_time_series_plots(res,  BS.ppnRR = TRUE, ppn.RR=ppn.RR)
 
@@ -320,13 +324,13 @@ res <- run.lever.model(p = 175, per.mark = 0, hatchery.size = hatchery.size,
                        BS.ppnRR = TRUE, ppn.RR = ppn.RR, sel = 0,
                        Theta.hatch = Theta.hatch, c = c, sex.ratio = 0.5,
                        percent.hatch = percent.hatch, HR = HR, h = h, w = sqrt(100),
-                       mar.surv = 0.02, RS = 0.8, mar.surv.hatch = 0.0024)
+                       mar.surv = 0.02, RS = 0.8, mar.surv.hatch = 0.0024, BS.invRR = BS.invRR)
 res.nogenetics <- run.lever.model(p = 175, per.mark = 0, hatchery.size = hatchery.size, 
                                   BS.ppnRR = TRUE, ppn.RR = ppn.RR, sel = 0, 
                                   Theta.hatch = 100, c = c, sex.ratio = 0.5, 
                                   percent.hatch = percent.hatch, HR = HR, h = h,
                                   w = sqrt(100), mar.surv = 0.02, RS = 0.8, 
-                                  mar.surv.hatch = 0.0024)
+                                  mar.surv.hatch = 0.0024, BS.invRR = BS.invRR)
 time_series_plots(res, res.nogenetics, BS.ppnRR = TRUE, ppn.RR=ppn.RR)
 # return_time_series_plots(res,  BS.ppnRR = TRUE, ppn.RR=ppn.RR)
 
@@ -335,14 +339,43 @@ res <- run.lever.model(p = 175, per.mark = 0, hatchery.size = hatchery.size,
                        BS.ppnRR = TRUE, ppn.RR = ppn.RR, sel = 0,
                        Theta.hatch = Theta.hatch, c = c, sex.ratio = 0.5,
                        percent.hatch = percent.hatch, HR = HR, h = h, w = sqrt(100),
-                       mar.surv = 0.02, RS = 0.8, mar.surv.hatch = 0.0024)
+                       mar.surv = 0.02, RS = 0.8, mar.surv.hatch = 0.0024, BS.invRR = BS.invRR)
 res.nogenetics <- run.lever.model(p = 175, per.mark = 0, hatchery.size = hatchery.size, 
                                   BS.ppnRR = TRUE, ppn.RR = ppn.RR, sel = 0, 
                                   Theta.hatch = 100, c = c, sex.ratio = 0.5, 
                                   percent.hatch = percent.hatch, HR = HR, h = h,
                                   w = sqrt(100), mar.surv = 0.02, RS = 0.8, 
-                                  mar.surv.hatch = 0.0024)
+                                  mar.surv.hatch = 0.0024, BS.invRR = BS.invRR)
 time_series_plots(res, res.nogenetics, BS.ppnRR = TRUE, ppn.RR=ppn.RR)
 # return_time_series_plots(res,  BS.ppnRR = TRUE, ppn.RR=ppn.RR)
 
+# dev.off()
+
+# Results on time-series were BS is determined as a ppn of eq pop size, but 
+# there is a max cap on BS at beginning as ppn RR, BS.ppnRR.cap
+
+pdf(here::here("Results/Timeseries-BScaps_hatchsize_0.5.pdf"))
+hs <- 0.5
+w <- sqrt(100)#sqrt(40)
+S.init.ppn <- 0.1
+# BS.ppnRR.cap = 0.1
+for (i in 1:10){
+  BS.ppnRR.cap <- i*0.05
+  print(BS.ppnRR.cap)
+  res <- run.lever.model(p = 175, per.mark = 0, hatchery.size = hs, 
+                         BS.ppnRR = FALSE, ppn.RR = 0.33, sel = 0,
+                         Theta.hatc = 80, c = c, sex.ratio = 0.5,
+                         percent.hatch = percent.hatch, HR = HR, h = h, w = w,
+                         mar.surv = 0.02, RS = 0.8, mar.surv.hatch = 0.0024, 
+                         BS.ppnRR.cap = BS.ppnRR.cap, S.init.ppn = S.init.ppn)
+  res.nogenetics <- run.lever.model(p = 175, per.mark = 0, hatchery.size = hs, 
+                                    BS.ppnRR = FALSE, ppn.RR = 0.33, sel = 0, 
+                                    Theta.hatch = 100, c = c, sex.ratio = 0.5, 
+                                    percent.hatch = percent.hatch, HR = HR, h = h,
+                                    w = w, mar.surv = 0.02, RS = 0.8, 
+                                    mar.surv.hatch = 0.0024, BS.ppnRR.cap = BS.ppnRR.cap, 
+                                    S.init.ppn = S.init.ppn)
+  time_series_plots(res, res.nogenetics)
+  
+}
 dev.off()
