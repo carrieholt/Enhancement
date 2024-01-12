@@ -7,12 +7,12 @@ BH<-function(HOS, NOS, RS, p, c){#Beverton-Holt spawner-recruitment function. Eq
   #INPUT: HOS=hatchery-origin spanwers; NOS=natural-origin spawners; RS= relative surival of hatchery fish; p=density-independent survival (slope at origin of R/S); c=capacity (Rmax)
   #OUTPUT: Sm.nat=smolts
   #See Hilborn and Walters (1992) for a description of this BH formulation
-  # Sm.nat<-p*(NOS+RS*HOS)/(1+(p*(NOS+RS*HOS))/c)
-  # return(Sm.nat)
-  
-  Sadj <- (NOS^2 + 2*RS*NOS*HOS + RS^2*HOS^2)/(HOS + NOS)
-  Sm.nat<-p*Sadj / (1 + (p*Sadj)/c)
+  Sm.nat<-p*(NOS+RS*HOS)/(1+(p*(NOS+RS*HOS))/c)
   return(Sm.nat)
+  
+  #Sadj <- (NOS^2 + 2*RS*NOS*HOS + RS^2*HOS^2)/(HOS + NOS)
+  # Sm.nat<-p*Sadj / (1 + (p*Sadj)/c)
+  # return(Sm.nat)
   
 }
 

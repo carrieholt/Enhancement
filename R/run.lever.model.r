@@ -250,7 +250,7 @@ Sp.nat[1] <- NOS[1] + HOS[1]
 
 fit.smolt[1] <- fit.lifestage( P.nat[1], Theta.nat, w, sig, rel.loss)
 Sm.nat[1] <- BH(HOS[1], NOS[1], RS, p, c) * fit.smolt[1]
-Sm.hatch[1] <- Hatch.sm( BS[1] * bs.surv, fec, sex.ratio, release.surv) #*  fit.smolt[1]
+Sm.hatch[1] <- Hatch.sm( BS[1] * bs.surv, fec, sex.ratio, release.surv) ##*  fit.smolt[1]
 
 fit.adult[1] <- fit.lifestage( P.nat[1], Theta.nat, w, sig, 1 - rel.loss)
 # Returns to spawning grounds AFTER harvest
@@ -258,7 +258,7 @@ ret.nat[1] <- Sm.nat[1] * mar.surv * fit.adult[1] * (1-HR)
 #Returns to hatchery BEFORE harvest
 ret.hatch.preharvest[1] <- Sm.hatch[1] * mar.surv.hatch
 #Returns to hatchery AFTER harvest
-ret.hatch[1] <- Sm.hatch[1] * mar.surv.hatch * (1 - HR) * fit.adult[1]
+ret.hatch[1] <- Sm.hatch[1] * mar.surv.hatch * (1 - HR) #* fit.adult[1]
 #Returns to hatchery BEFORE harvest
 ret.nat.preharvest[1] <- Sm.nat[1] * mar.surv * fit.adult[1]
 # Catch includes harvest + fish selectively removed from river after harvest
@@ -461,11 +461,11 @@ for (i in 2:n_gen){#for i generations)
   P.hatch[i]<-Phatch(pNOB[i-1], P.hatch[i-1], w, sig, Theta.hatch, h, P.nat[i-1])
   fit.smolt[i]<-fit.lifestage(P.nat[i], Theta.nat, w, sig, rel.loss)
   Sm.nat[i]<-BH(HOS[i], NOS[i], RS, p, c)*fit.smolt[i]
-  Sm.hatch[i]<-Hatch.sm(BS[i]*bs.surv, fec, sex.ratio, release.surv)#*fit.smolt[i]
+  Sm.hatch[i]<-Hatch.sm(BS[i]*bs.surv, fec, sex.ratio, release.surv)##*fit.smolt[i]
   
   fit.adult[i]<-fit.lifestage(P.nat[i], Theta.nat, w, sig, 1-rel.loss)
   ret.nat[i]<-Sm.nat[i]*mar.surv*fit.adult[i]*(1-HR)
-  ret.hatch[i]<-Sm.hatch[i]*mar.surv.hatch*(1-HR)*fit.adult[i]
+  ret.hatch[i]<-Sm.hatch[i]*mar.surv.hatch*(1-HR)#*fit.adult[i]
   ret.hatch.preharvest[i]<-Sm.hatch[i]*mar.surv.hatch
   ret.nat.preharvest[i]<-Sm.nat[i]*mar.surv*fit.adult[i]
   catch[i]<-(ret.hatch.preharvest[i]+ret.nat.preharvest[i])*HR + ret.hatch[i]*(1-percent.hatch)*(per.mark)*sel#Includes harvest + fish selectively removed from river after harvest

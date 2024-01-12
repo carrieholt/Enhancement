@@ -3,6 +3,12 @@
 # Adapted from "HatcheryLevers.R", which gives similar trajectories over 100 yrs
 # 5 Oct 2023
 
+
+library(ggplot2)
+library(dplyr)
+library(ggpubr)
+# library(RColorBrewer)
+library(viridis)
 source("R/FuncDefs.r")
 source("R/SeqFormulationBH.r")
 source("R/run.lever.model.r")
@@ -354,28 +360,198 @@ time_series_plots(res, res.nogenetics, BS.ppnRR = TRUE, ppn.RR=ppn.RR)
 # Results on time-series were BS is determined as a ppn of eq pop size, but 
 # there is a max cap on BS at beginning as ppn RR, BS.ppnRR.cap
 
-pdf(here::here("Results/Timeseries-BScaps_hatchsize_0.5.pdf"))
-hs <- 0.5
-w <- sqrt(100)#sqrt(40)
-S.init.ppn <- 0.1
-# BS.ppnRR.cap = 0.1
-for (i in 1:10){
-  BS.ppnRR.cap <- i*0.05
-  print(BS.ppnRR.cap)
-  res <- run.lever.model(p = 175, per.mark = 0, hatchery.size = hs, 
-                         BS.ppnRR = FALSE, ppn.RR = 0.33, sel = 0,
-                         Theta.hatc = 80, c = c, sex.ratio = 0.5,
-                         percent.hatch = percent.hatch, HR = HR, h = h, w = w,
-                         mar.surv = 0.02, RS = 0.8, mar.surv.hatch = 0.0024, 
-                         BS.ppnRR.cap = BS.ppnRR.cap, S.init.ppn = S.init.ppn)
-  res.nogenetics <- run.lever.model(p = 175, per.mark = 0, hatchery.size = hs, 
-                                    BS.ppnRR = FALSE, ppn.RR = 0.33, sel = 0, 
-                                    Theta.hatch = 100, c = c, sex.ratio = 0.5, 
-                                    percent.hatch = percent.hatch, HR = HR, h = h,
-                                    w = w, mar.surv = 0.02, RS = 0.8, 
-                                    mar.surv.hatch = 0.0024, BS.ppnRR.cap = BS.ppnRR.cap, 
-                                    S.init.ppn = S.init.ppn)
-  time_series_plots(res, res.nogenetics)
+plot.timeseries <- FALSE
+if(plot.timeseries){
+  pdf(here::here("Results/Timeseries-BScaps_hatchsize_0.1.pdf"))
+  hs <- 0.1
+  w <- sqrt(100)#sqrt(40)
+  S.init.ppn <- 0.1
+  # BS.ppnRR.cap = 0.1
+  for (i in 1:10){
+    BS.ppnRR.cap <- i*0.05
+    print(BS.ppnRR.cap)
+    res <- run.lever.model(p = 175, per.mark = 0, hatchery.size = hs, 
+                           BS.ppnRR = FALSE, ppn.RR = 0.33, sel = 0,
+                           Theta.hatc = 80, c = c, sex.ratio = 0.5,
+                           percent.hatch = percent.hatch, HR = HR, h = h, w = w,
+                           mar.surv = 0.02, RS = 0.8, mar.surv.hatch = 0.0024, 
+                           BS.ppnRR.cap = BS.ppnRR.cap, S.init.ppn = S.init.ppn)
+    res.nogenetics <- run.lever.model(p = 175, per.mark = 0, hatchery.size = hs, 
+                                      BS.ppnRR = FALSE, ppn.RR = 0.33, sel = 0, 
+                                      Theta.hatch = 100, c = c, sex.ratio = 0.5, 
+                                      percent.hatch = percent.hatch, HR = HR, h = h,
+                                      w = w, mar.surv = 0.02, RS = 0.8, 
+                                      mar.surv.hatch = 0.0024, BS.ppnRR.cap = BS.ppnRR.cap, 
+                                      S.init.ppn = S.init.ppn)
+    time_series_plots(res, res.nogenetics)
+    
+  }
+  dev.off()
   
 }
-dev.off()
+
+# Suggested Fig 1 from Tim
+
+plot.fig1 <- TRUE
+if(plot.fig1){
+  
+  
+  
+  # hs <- 0.1
+  for (hs in seq(0.1,0.5,0.1)){
+    w <- sqrt(100)#sqrt(40)
+    S.init.ppn <- 0.1
+    # BS.ppnRR.cap = 0.1
+    PNI.dum <- matrix(NA, nrow=100, ncol=3)
+    fitness.dum <- matrix(NA, nrow=100, ncol=3)
+    bs.dum <- matrix(NA, nrow=100, ncol=3)
+    PNI.df <- NA
+    fitness.df <- NA
+    bs.df <- NA
+    
+    for (i in 1:10){
+      BS.ppnRR.cap <- i*0.05 # actually limit not cap
+      print(BS.ppnRR.cap)
+      res <- run.lever.model(p = 175, per.mark = 0, hatchery.size = hs, 
+                             BS.ppnRR = FALSE, ppn.RR = 0.33, sel = 0,
+                             Theta.hatc = 80, c = c, sex.ratio = 0.5,
+                             percent.hatch = percent.hatch, HR = HR, h = h, w = w,
+                             mar.surv = 0.02, RS = 0.8, mar.surv.hatch = 0.0024, 
+                             BS.ppnRR.cap = BS.ppnRR.cap, S.init.ppn = S.init.ppn)
+      
+      # Extract PNI from model runs
+      PNI.dum[,1] <- BS.ppnRR.cap  # actually limit not cap
+      PNI.dum[,2] <- 1:100
+      PNI.dum[,3] <- res$PNI
+      if (i==1) PNI.df <- PNI.dum
+      if (i>1) PNI.df <- rbind(PNI.df, PNI.dum)
+      
+      # Extract life-cycle fitness from model runs
+      fitness.dum[,1] <- BS.ppnRR.cap  # actually limit not cap
+      fitness.dum[,2] <- 1:100
+      fitness.dum[,3] <- res$fit.smolt^2
+      if (i==1) fitness.df <- fitness.dum
+      if (i>1) fitness.df <- rbind(fitness.df, fitness.dum)
+      
+      # Extarct brood size from model runs
+      bs.dum[,1] <- BS.ppnRR.cap
+      bs.dum[,2] <- 1:100
+      bs.dum[,3] <- res$BS
+      if (i==1) bs.df <- bs.dum
+      if (i>1) bs.df <- rbind(bs.df, bs.dum)
+      
+    }
+    
+    PNI.df <- as.data.frame(PNI.df)
+    PNI.df <- PNI.df |> dplyr::transmute(Limit = V1, Year = V2, PNI=V3)
+    fitness.df <- as.data.frame(fitness.df)
+    fitness.df <- fitness.df |> 
+      dplyr::transmute(Limit = V1, Year = V2, Fitness = V3)
+    bs.df <- as.data.frame(bs.df)
+    bs.df <- bs.df |> dplyr::transmute(Limit = V1, Year = V2, MaxHatcherySize=V3)
+    
+    
+    # nb.cols <- 18
+    # # mycolours <- colorRampPalette(brewer.pal(8, "GnBu"))(nb.cols)[9:18]
+    # mycolours <- colorRampPalette(brewer.pal(8, "GnBu"))(nb.cols)[9:18]
+    
+    PNI.plot <- PNI.df |> ggplot(aes(Year, PNI, colour = as.factor(Limit))) + 
+      geom_line(size=1.1) + 
+      scale_color_viridis(discrete = TRUE, direction = -1, option="viridis") +
+      # theme_classic() + 
+      theme_minimal() +
+      theme(legend.position = "none") +
+      theme(axis.text=element_text(size=12),
+            axis.title=element_text(size=14)) + 
+      annotate("text", x = 1, y = 1.03, label = "(a)") +
+      ylim(0,1.03) 
+    
+    fitness.plot <- fitness.df |> ggplot(aes(Year, Fitness, 
+                                             colour = as.factor(Limit))) + 
+      geom_line(size=1.1) + 
+      scale_color_viridis(discrete = TRUE, direction = -1, option="viridis") + 
+      # scale_color_manual(values = mycolours) +
+      # theme_classic() + 
+      theme_minimal() +
+      theme(legend.position = "none") +
+      theme(axis.text=element_text(size=12),
+            axis.title=element_text(size=14)) + 
+      annotate("text", x = 1, y = 1.03, label = "(b)") +
+      ylim(0,1.03) 
+    legend.plot <- PNI.df |> ggplot(aes(Year, PNI, colour = as.factor(Limit))) + 
+      geom_line(size=1.1) + 
+      scale_color_viridis(discrete = TRUE, direction = -1, option="viridis", 
+                          name="Limit on brood take\nas a proportion of\nreturns") 
+    leg <- get_legend(legend.plot)
+    legend <- as_ggplot(leg) 
+    
+    multi.panel <- ggarrange(PNI.plot, fitness.plot, legend, nrow = 1, ncol = 3, 
+                             widths = c(4,4,1.5))
+    #--------------------------------------------------------------------------
+    # Figure 1- printed 5 times for each cap on hatchery size
+    file.name <- paste("Fig1-HatcheryCap-", hs, sep="")
+    # ggsave( paste(here::here("Results"), "/", file.name, ".png", sep = ""), 
+    #         multi.panel, width = 10, height =5, bg="white")
+    #--------------------------------------------------------------------------
+    
+    # Data for Fig. 2
+    fitness.df.last <- fitness.df |> filter(Year==100) |> select(!Year) |> 
+      mutate (Cap = hs)
+    if(hs == 0.1) df.1 <- fitness.df.last
+    if(hs > 0.1) df.1 <- rbind(df.1, fitness.df.last)
+    
+    bs.df.last <- bs.df |> filter(Year==100) |> select(!Year) |> 
+      mutate(Cap = hs)
+    if(hs==0.1) df.2 <- bs.df.last
+    if(hs > 0.1) df.2 <- rbind(df.2, bs.df.last)
+   
+  }
+
+#--------------------------------------------------------------------------
+# Figure 2
+# df.1 |> ggplot(aes(Limit, Fitness, colour = as.factor(Cap))) +
+#     geom_line(size = 1.1)
+  
+  Fig2.df <- left_join(df.1,df.2, join_by(Limit == Limit, Cap == Cap)) 
+  
+  Fig2a <- Fig2.df |> ggplot(aes(Limit, Fitness, colour = as.factor(Cap))) +
+    geom_line(size = 1.1) + 
+    geom_point(size = 2, shape = 21, fill="white") +
+    scale_color_viridis(discrete = TRUE, direction = -1, option="viridis") + 
+    theme_minimal() +
+    theme(legend.position = "none") +
+    theme(axis.text=element_text(size=12),
+          axis.title=element_text(size=14)) + 
+    annotate("text", x = 0.01, y = 1.03, label = "(a)") +
+    labs(x="Limit on brood size as\na proportion of returns")
+    
+  Fig2b <- Fig2.df |> ggplot(aes(MaxHatcherySize, Fitness, colour = as.factor(Cap))) +
+    geom_line(size = 1.1) + 
+    geom_point(size = 2, shape = 21, fill="white") +
+    scale_color_viridis(discrete = TRUE, direction = -1, option="viridis") + 
+    theme_minimal() +
+    theme(legend.position = "none") +
+    theme(axis.text=element_text(size=12),
+          axis.title=element_text(size=14)) + 
+    annotate("text", x = 1, y = 1.03, label = "(b)") + 
+    labs(x="Maximum\nhatchery size", y=element_blank())
+    
+  Fig2.legend <- Fig2.df |> ggplot(aes(MaxHatcherySize, Fitness, colour = as.factor(Cap))) +
+    geom_line(size = 1.1) + 
+    geom_point(size = 2, shape = 21, fill="white") +
+    theme_minimal() +
+    scale_color_viridis(discrete = TRUE, direction = -1, option="viridis", 
+                        name="Cap on brood\nsize as a\nproportion of\nequiibrium\nabundances") 
+
+  Fig2.leg <- get_legend(Fig2.legend)
+  legend <- as_ggplot(Fig2.leg) 
+  
+  Fig2.multi.panel <- ggarrange(Fig2a, Fig2b, legend, nrow = 1, ncol = 3, 
+                           widths = c(4, 3.7, 1.5))
+  
+  Fig2.multi.panel
+
+  ggsave( here::here("Results/Fig2.png"), 
+           Fig2.multi.panel, width = 10, height =5, bg="white")
+  
+}
