@@ -1,7 +1,15 @@
-# Short time-series plots to evaluate plausible fitness parameters, i.e., 
-# those that give shrot-term trajectoreis that agree with previous literature
-# Adapted from "HatcheryLevers.R", which gives similar trajectories over 100 yrs
-# 5 Oct 2023
+# Time-series plots to evaluate plausible fitness parameters, i.e., 
+# those that give long or short-term trajectoriss that agree with previous 
+# literature
+# Adapted from "HatcheryLevers.R", which gives similar trajectories limited to 
+# 100 yrs
+
+# Also used to investigate PNI and fitness outcomes of different brood take 
+# limits as a proportion of returns to river
+# See "plot.fig.SSR" for plots for CSAS SSR (2024)
+
+# Date created: 5 Oct 2023
+# Date last revised: 18 Jan 2024
 
 
 library(ggplot2)
@@ -392,8 +400,8 @@ if(plot.timeseries){
 
 # Suggested Fig 1 from Tim
 
-plot.fig1 <- TRUE
-if(plot.fig1){
+plot.fig.SSR <- TRUE # Figures for CSAS SSR (2024)
+if(plot.SSR){
   
   
   
@@ -536,12 +544,13 @@ if(plot.fig1){
     annotate("text", x = 1, y = 1.03, label = "(b)") + 
     labs(x="Maximum\nhatchery size", y=element_blank())
     
-  Fig2.legend <- Fig2.df |> ggplot(aes(MaxHatcherySize, Fitness, colour = as.factor(Cap))) +
+  Fig2.legend <- Fig2.df |> ggplot(aes(MaxHatcherySize, Fitness, 
+                                       colour = as.factor(Cap))) +
     geom_line(size = 1.1) + 
     geom_point(size = 2, shape = 21, fill="white") +
     theme_minimal() +
     scale_color_viridis(discrete = TRUE, direction = -1, option="viridis", 
-                        name="Cap on brood\nsize as a\nproportion of\nequiibrium\nabundances") 
+                        name="Cap on brood\nsize as a\nproportion of\nequilibrium\nabundances") 
 
   Fig2.leg <- get_legend(Fig2.legend)
   legend <- as_ggplot(Fig2.leg) 
