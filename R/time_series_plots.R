@@ -412,10 +412,12 @@ if(plot.SSR){
     # BS.ppnRR.cap = 0.1
     PNI.dum <- matrix(NA, nrow=100, ncol=3)
     fitness.dum <- matrix(NA, nrow=100, ncol=3)
-    bs.dum <- matrix(NA, nrow=100, ncol=3)
+    bs.dum <- matrix(NA, nrow=100, ncol=4)
+    Sp.nat.dum <- matrix(NA, nrow=100, ncol=3)
     PNI.df <- NA
     fitness.df <- NA
     bs.df <- NA
+    Sp.nat.df <- NA
     
     for (i in 1:10){
       BS.ppnRR.cap <- i*0.05 # actually limit not cap
@@ -445,18 +447,37 @@ if(plot.SSR){
       bs.dum[,1] <- BS.ppnRR.cap
       bs.dum[,2] <- 1:100
       bs.dum[,3] <- res$BS
+      bs.dum[,4] <- rep(res$hatchery.size * res$Seq, 100)
       if (i==1) bs.df <- bs.dum
       if (i>1) bs.df <- rbind(bs.df, bs.dum)
       
+      # Extract abundance of spawners on spawning grounds (sp.nat) from model runs
+      Sp.nat.dum[,1] <- BS.ppnRR.cap
+      Sp.nat.dum[,2] <- 1:100
+      Sp.nat.dum[,3] <- res$Sp.nat
+      if (i==1) Sp.nat.df <- Sp.nat.dum
+      if (i>1) Sp.nat.df <- rbind(Sp.nat.df, Sp.nat.dum)
+      
+
     }
     
     PNI.df <- as.data.frame(PNI.df)
-    PNI.df <- PNI.df |> dplyr::transmute(Limit = V1, Year = V2, PNI=V3)
+    PNI.df <- PNI.df |> dplyr::transmute(Limit = V1, 
+                                         Year = V2, 
+                                         PNI = V3)
     fitness.df <- as.data.frame(fitness.df)
-    fitness.df <- fitness.df |> 
-      dplyr::transmute(Limit = V1, Year = V2, Fitness = V3)
+    fitness.df <- fitness.df |> dplyr::transmute(Limit = V1, 
+                                                 Year = V2,  
+                                                 Fitness = V3)
     bs.df <- as.data.frame(bs.df)
-    bs.df <- bs.df |> dplyr::transmute(Limit = V1, Year = V2, MaxHatcherySize=V3)
+    bs.df <- bs.df |> dplyr::transmute(Limit = V1, 
+                                       Year = V2, 
+                                       MaxHatcherySize = V3, 
+                                       cap = V4)
+    Sp.nat.df <- as.data.frame(Sp.nat.df)
+    Sp.nat.df <- Sp.nat.df |> dplyr::transmute(Limit = V1, 
+                                               Year = V2, 
+                                               Sp.nat = V3)
     
     
     # nb.cols <- 18
@@ -470,9 +491,10 @@ if(plot.SSR){
       theme_minimal() +
       theme(legend.position = "none") +
       theme(axis.text=element_text(size=12),
-            axis.title=element_text(size=14)) + 
+            axis.title=element_text(size=14),
+            axis.title.x = element_blank()) + 
       annotate("text", x = 1, y = 1.03, label = "(a)") +
-      ylim(0,1.03) 
+      ylim(0,1.03)
     
     fitness.plot <- fitness.df |> ggplot(aes(Year, Fitness, 
                                              colour = as.factor(Limit))) + 
@@ -483,9 +505,41 @@ if(plot.SSR){
       theme_minimal() +
       theme(legend.position = "none") +
       theme(axis.text=element_text(size=12),
-            axis.title=element_text(size=14)) + 
+            axis.title=element_text(size=14),
+            axis.title.x = element_blank()) + 
       annotate("text", x = 1, y = 1.03, label = "(b)") +
       ylim(0,1.03) 
+
+    cap <- bs.df$cap[1]
+    bs.plot <- bs.df |> ggplot(aes(Year, MaxHatcherySize, 
+                                             colour = as.factor(Limit))) + 
+      geom_line(size=1.1) + 
+      scale_color_viridis(discrete = TRUE, direction = -1, option="viridis") + 
+      # scale_color_manual(values = mycolours) +
+      # theme_classic() + 
+      theme_minimal() +
+      theme(legend.position = "none") +
+      theme(axis.text=element_text(size=12),
+            axis.title=element_text(size=14)) + 
+      annotate("text", x = 1, y = cap*1.05, label = "(c)") + 
+      ylab("Hatchery size (broodtake)") +
+      ylim(0,cap*1.05) +
+      geom_hline(yintercept = cap, linetype="dashed", color="grey")
+
+    ylim <- max(Sp.nat.df$Sp.nat)
+    Sp.nat.plot <- Sp.nat.df |> ggplot(aes(Year, Sp.nat, 
+                                   colour = as.factor(Limit))) + 
+      geom_line(size=1.1) + 
+      scale_color_viridis(discrete = TRUE, direction = -1, option="viridis") + 
+      # scale_color_manual(values = mycolours) +
+      # theme_classic() + 
+      theme_minimal() +
+      theme(legend.position = "none") +
+      theme(axis.text=element_text(size=12),
+            axis.title=element_text(size=14)) + 
+      annotate("text", x = 1, y =ylim*1.05, label = "(d)") + 
+      ylab("Natural spawners")
+
     legend.plot <- PNI.df |> ggplot(aes(Year, PNI, colour = as.factor(Limit))) + 
       geom_line(size=1.1) + 
       scale_color_viridis(discrete = TRUE, direction = -1, option="viridis", 
@@ -493,13 +547,22 @@ if(plot.SSR){
     leg <- get_legend(legend.plot)
     legend <- as_ggplot(leg) 
     
-    multi.panel <- ggarrange(PNI.plot, fitness.plot, legend, nrow = 1, ncol = 3, 
-                             widths = c(4,4,1.5))
+    # multi.panel <- ggarrange(PNI.plot, fitness.plot, legend, 
+    #                          bs.plot, Sp.nat.plot, NULL, 
+    #                          nrow = 2, ncol = 3, 
+    #                          widths = c(4,4,1.5))
+    multi.panel.noLeg <- ggarrange(PNI.plot, fitness.plot,  
+                             bs.plot, Sp.nat.plot, 
+                             nrow = 2, ncol = 2, 
+                             widths = c(4,4))
+    multi.panel <- ggarrange(multi.panel.noLeg, legend, 
+                             nrow = 1, ncol=2, 
+                             widths= c(8,1.5))
     #--------------------------------------------------------------------------
     # Figure 1- printed 5 times for each cap on hatchery size
-    file.name <- paste("Fig1-HatcheryCap-", hs, sep="")
+    file.name <- paste("Fig1-HatcheryCapv2-", hs, sep="")
     # ggsave( paste(here::here("Results"), "/", file.name, ".png", sep = ""), 
-    #         multi.panel, width = 10, height =5, bg="white")
+    #          multi.panel, width = 10, height =8, bg="white")
     #--------------------------------------------------------------------------
     
     # Data for Fig. 2
